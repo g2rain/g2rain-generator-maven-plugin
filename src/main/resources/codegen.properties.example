@@ -1,0 +1,35 @@
+###########################################################################
+# 1. 数据库连接配置（必填，插件需通过数据库元数据生成代码）
+###########################################################################
+# 数据库连接URL（支持MySQL、Oracle等，按需修改）
+# 示例：MySQL 8.x -> jdbc:mysql://localhost:3306/数据库名?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+# 示例：Oracle -> jdbc:oracle:thin:@localhost:1521:ORACLE
+database.url=jdbc:mysql://localhost:3306/my_database?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+
+# JDBC驱动类名（需与数据库类型匹配，确保项目依赖对应驱动）
+# MySQL 8.x -> com.mysql.cj.jdbc.Driver；MySQL 5.x -> com.mysql.jdbc.Driver
+database.driver=com.mysql.cj.jdbc.Driver
+
+# 数据库用户名（需有查询表结构的权限，如SELECT权限）
+database.username=root
+
+# 数据库密码（若为空，直接留空即可）
+database.password=root123456
+
+###########################################################################
+# 2. 项目基础信息配置（必填，控制代码生成的包路径和项目标识）
+###########################################################################
+
+# 基础包路径（生成的代码会放在该包下，自动拆分subpackage）
+# 示例：com.g2rain.demo -> 生成PO在com.g2rain.demo.po，VO在com.g2rain.demo.vo
+project.basePackage=com.g2rain.demo
+
+###########################################################################
+# 3. 表生成配置（必填，指定要生成代码的表）
+###########################################################################
+# 要生成代码的表名（支持单个表，多表可用逗号分隔：table1,table2）
+# 注意：表名需与数据库中一致（区分大小写，如MySQL默认不区分，Oracle区分）
+database.tables=test
+
+# 生成的数据库表名是否允许覆盖, 默认是不覆盖
+tables.overwrite=false
