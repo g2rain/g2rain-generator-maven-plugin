@@ -12,11 +12,14 @@
     <name>G2rain Java Code Generator Maven Plugin</name>
     <description>Custom Maven plugin for code generation with JDK 21 support</description>
 
+    <!-- Project URL: Maven Central 要求必须配置 -->
+    <url>https://github.com/g2rain/g2rain-generator-maven-plugin</url>
+
     <!-- SCM 信息：用于 Maven Central 展示和发布 -->
     <scm>
-        <connection>scm:git:git://github.com/g2rain/g2rain-generator-maven-plugin.git</connection>
-        <developerConnection>scm:git:ssh://github.com:g2rain/g2rain-generator-maven-plugin.git</developerConnection>
         <url>https://github.com/g2rain/g2rain-generator-maven-plugin</url>
+        <connection>scm:git:https://github.com/g2rain/g2rain-generator-maven-plugin.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/g2rain/g2rain-generator-maven-plugin.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
@@ -57,24 +60,21 @@
         <compiler.surefire.version>3.2.5</compiler.surefire.version>
         <maven.source.plugin.version>3.3.1</maven.source.plugin.version>
         <maven.javadoc.plugin.version>3.12.0</maven.javadoc.plugin.version>
+        <flatten.maven.plugin.version>1.7.3</flatten.maven.plugin.version>
+        <maven.gpg.plugin.version>3.2.7</maven.gpg.plugin.version>
+        <central.publishing.maven.plugin.version>0.9.0</central.publishing.maven.plugin.version>
         <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- 发布到 Maven Central 相关属性 -->
-        <gpg.keyname>${env.GPG_KEYNAME}</gpg.keyname>
-        <gpg.passphrase>${env.MAVEN_GPG_PASSPHRASE}</gpg.passphrase>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
-    <!-- Maven Central / Sonatype OSSRH 仓库配置 -->
     <distributionManagement>
+        <!-- Snapshot 仓库配置 -->
         <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            <id>central</id>
+            <url>https://central.sonatype.com/content/repositories/snapshots</url>
         </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
+        <!-- Release 仓库由 central-publishing-maven-plugin 自动处理，无需配置 -->
     </distributionManagement>
 
     <dependencyManagement>
@@ -278,7 +278,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>${maven.javadoc.plugin.version}</version>
                 <configuration>
-                    <release>${maven.compiler.release}</release>
+                    <release>${maven.compiler.target}</release>
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <doclint>none</doclint>
                     <additionalJOption>-Xdoclint:none</additionalJOption>
@@ -292,10 +292,37 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- 生成一个"扁平化"的 POM 文件 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${flatten.maven.plugin.version}</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
-    <!-- 发布 profile：签名 + Sonatype staging -->
+    <!-- 发布 profile：签名 + Central Publisher Portal -->
     <profiles>
         <profile>
             <id>release</id>
@@ -305,7 +332,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.2.7</version>
+                        <version>${maven.gpg.plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -319,22 +346,25 @@
                                         <arg>--pinentry-mode</arg>
                                         <arg>loopback</arg>
                                     </gpgArguments>
-                                    <passphrase>${gpg.passphrase}</passphrase>
+                                    <passphrase>${env.MAVEN_GPG_PASSPHRASE}</passphrase>
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
 
-                    <!-- Sonatype Nexus staging 插件：自动 close & release -->
+                    <!-- Central Publishing Maven Plugin：使用新的 Central Publisher Portal -->
+                    <!-- 参考文档：https://central.sonatype.org/publish/publish-portal-maven/ -->
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.7.0</version>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central.publishing.maven.plugin.version}</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                            <publishingServerId>central</publishingServerId>
+                            <!-- 自动发布，无需手动干预（适合 CI 构建） -->
+                            <autoPublish>true</autoPublish>
+                            <!-- 等待直到发布完成 -->
+                            <waitUntil>published</waitUntil>
                         </configuration>
                     </plugin>
                 </plugins>
