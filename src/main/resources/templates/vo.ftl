@@ -60,7 +60,7 @@ import com.g2rain.common.json.AdminCompanyCondition;
 public class ${table.entityName}Vo extends BaseVo {
     <#-- 2. 业务字段（表特有核心字段，BaseVo未包含，单独定义，排除deleteFlag和version） -->
     <#list table.columns as column>
-    <#if column != table.deleteFlagColumn && column != table.versionColumn>
+    <#if !column.isDeleteFlag() && !column.isVersion()>
 
     /**
      * ${column.columnComment!''}
@@ -76,13 +76,5 @@ public class ${table.entityName}Vo extends BaseVo {
      */
     @ConditionalJsonIgnore(adminCompany = AdminCompanyCondition.TRUE)
     private ${table.deleteFlagColumn.javaType} ${table.deleteFlagColumn.propertyName};
-    </#if>
-    <#-- version字段（如果存在） -->
-    <#if table.versionColumn??>
-
-    /**
-     * ${table.versionColumn.columnComment!''}
-     */
-    private ${table.versionColumn.javaType} ${table.versionColumn.propertyName};
     </#if>
 }

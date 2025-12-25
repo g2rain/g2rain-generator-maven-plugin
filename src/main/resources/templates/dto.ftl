@@ -59,7 +59,7 @@ public class ${table.entityName}Dto extends BaseDto {
     <#-- 排除基础类已有的时间字段 -->
     <#if column.propertyName != "createTime" && column.propertyName != "updateTime">
     <#-- 排除deleteFlag和version字段（单独处理） -->
-    <#if column != table.deleteFlagColumn && column != table.versionColumn>
+    <#if !column.isDeleteFlag() && !column.isVersion()>
 
     /**
      * ${column.columnComment!''}
@@ -69,20 +69,4 @@ public class ${table.entityName}Dto extends BaseDto {
     </#if>
     </#if>
     </#list>
-    <#-- deleteFlag字段（如果存在） -->
-    <#if table.deleteFlagColumn??>
-
-    /**
-     * ${table.deleteFlagColumn.columnComment!''}
-     */
-    private ${table.deleteFlagColumn.javaType} ${table.deleteFlagColumn.propertyName};
-    </#if>
-    <#-- version字段（如果存在） -->
-    <#if table.versionColumn??>
-
-    /**
-     * ${table.versionColumn.columnComment!''}
-     */
-    private ${table.versionColumn.javaType} ${table.versionColumn.propertyName};
-    </#if>
 }

@@ -17,7 +17,7 @@
         <plugin>
             <groupId>com.g2rain</groupId>
             <artifactId>g2rain-generator-maven-plugin</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </plugin>
     </plugins>
 </build>
@@ -74,7 +74,7 @@ demo-project/
         <plugin>
             <groupId>com.g2rain</groupId>
             <artifactId>g2rain-generator-maven-plugin</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </plugin>
     </plugins>
 </build>
@@ -125,13 +125,13 @@ tables.overwrite=false
 
 ```bash
 # 使用默认配置文件名 codegen.properties
-mvn com.g2rain:g2rain-generator-maven-plugin:1.0.0:generate 
+mvn com.g2rain:g2rain-generator-maven-plugin:1.0.1:generate 
 
 # 使用默认配置文件名 codegen.properties，生成指定的表的接口
-mvn com.g2rain:g2rain-generator-maven-plugin:1.0.0:generate   -Dtable.name=表名
+mvn com.g2rain:g2rain-generator-maven-plugin:1.0.1:generate -Ddatabase.tables=表名
 
 # 或者使用自定义配置文件路径
-mvn com.g2rain:g2rain-generator-maven-plugin:1.0.0:generate \
+mvn com.g2rain:g2rain-generator-maven-plugin:1.0.1:generate \
   -Dconfig.file=/path/to/your-codegen.properties
 ```
 
@@ -140,7 +140,7 @@ mvn com.g2rain:g2rain-generator-maven-plugin:1.0.0:generate \
 所有关键参数都可以通过命令行传入（优先级高于配置文件）：
 
 ```bash
-mvn com.g2rain:g2rain-generator-maven-plugin:1.0.0:generate \
+mvn com.g2rain:g2rain-generator-maven-plugin:1.0.1:generate \
   -Dproject.basePackage=com.example.demo \
   -Ddatabase.url=jdbc:mysql://localhost:3306/test?useSSL=false&serverTimezone=UTC \
   -Ddatabase.driver=com.mysql.cj.jdbc.Driver \
@@ -280,7 +280,7 @@ mvn com.g2rain:g2rain-generator-maven-plugin:1.0.0:generate \
     <dependency>
         <groupId>com.g2rain</groupId>
         <artifactId>g2rain-common</artifactId>
-        <version>0.1.1</version>
+        <version>1.0.1</version>
     </dependency>
 
     <!-- Spring Web，用于 REST Controller 及 API -->
@@ -332,7 +332,7 @@ database.tables=user,order_info,product
 或：
 
 ```bash
-mvn com.g2rain:g2rain-generator-maven-plugin:1.0.0:generate \
+mvn com.g2rain:g2rain-generator-maven-plugin:1.0.1:generate \
   -Dproject.basePackage=com.example.demo \
   -Ddatabase.url=... \
   -Ddatabase.driver=com.mysql.cj.jdbc.Driver \
@@ -364,6 +364,7 @@ mvn com.g2rain:g2rain-generator-maven-plugin:1.0.0:generate \
 ### 版本历史
 
 - **v1.0.0**：初始版本，支持基于数据库表生成完整 CRUD 分层代码
+- **v1.0.1**：修订版本，修复Mybatis Mapper时间条件查询BUG
 
 ## 🤝 贡献指南
 

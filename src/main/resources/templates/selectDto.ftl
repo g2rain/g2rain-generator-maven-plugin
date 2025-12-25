@@ -60,7 +60,7 @@ public class ${table.entityName}SelectDto extends BasePageSelectListDto {
     <#-- 排除父类已有的时间字段 -->
     <#if column.propertyName != "createTime" && column.propertyName != "updateTime">
     <#-- 排除deleteFlag和version字段（单独处理） -->
-    <#if column != table.deleteFlagColumn && column != table.versionColumn>
+    <#if !column.isDeleteFlag() && !column.isVersion()>
 
     /**
      * ${column.columnComment!''}
@@ -70,12 +70,4 @@ public class ${table.entityName}SelectDto extends BasePageSelectListDto {
     </#if>
     </#if>
     </#list>
-    <#-- version字段（如果存在，用于查询条件） -->
-    <#if table.versionColumn??>
-
-    /**
-     * ${table.versionColumn.columnComment!''}
-     */
-    private ${table.versionColumn.javaType} ${table.versionColumn.propertyName};
-    </#if>
 }

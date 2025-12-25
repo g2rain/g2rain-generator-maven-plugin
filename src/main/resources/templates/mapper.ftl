@@ -15,12 +15,12 @@
         <#list table.columns as column>
         <result column="${column.columnName}" property="${column.propertyName}" jdbcType="${column.columnType}"/>
         </#list>
-        <!-- deleteFlag字段（如果存在） -->
         <#if table.deleteFlagColumn??>
+        <!-- deleteFlag字段（如果存在） -->
         <result column="${table.deleteFlagColumn.columnName}" property="${table.deleteFlagColumn.propertyName}" jdbcType="${table.deleteFlagColumn.columnType}"/>
         </#if>
-        <!-- version字段（如果存在） -->
         <#if table.versionColumn??>
+        <!-- version字段（如果存在） -->
         <result column="${table.versionColumn.columnName}" property="${table.versionColumn.propertyName}" jdbcType="${table.versionColumn.columnType}"/>
         </#if>
     </resultMap>
@@ -36,12 +36,12 @@
         ${table.baseColumns?map(column -> column.columnName)?join(", ")}<#if (table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
         <!-- 业务字段 -->
         ${table.columns?map(column -> column.columnName)?join(", ")}<#if (table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
-        <!-- deleteFlag字段（如果存在） -->
         <#if table.deleteFlagColumn??>
+        <!-- deleteFlag字段（如果存在） -->
         ${table.deleteFlagColumn.columnName}<#if table.versionColumn??>,</#if>
         </#if>
-        <!-- version字段（如果存在） -->
         <#if table.versionColumn??>
+        <!-- version字段（如果存在） -->
         ${table.versionColumn.columnName}
         </#if>
         ) VALUES (
@@ -53,12 +53,12 @@
         ${table.baseColumns?map(column -> "#{"+column.propertyName+", jdbcType="+column.columnType+"}")?join(", ")}<#if (table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
         <!-- 业务字段值 -->
         ${table.columns?map(column -> "#{"+column.propertyName+", jdbcType="+column.columnType+"}")?join(", ")}<#if (table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
-        <!-- deleteFlag字段值（如果存在，设置默认值为0） -->
         <#if table.deleteFlagColumn??>
+        <!-- deleteFlag字段值（如果存在，设置默认值为0） -->
         0<#if table.versionColumn??>,</#if>
         </#if>
-        <!-- version字段值（如果存在，设置默认值为0） -->
         <#if table.versionColumn??>
+        <!-- version字段值（如果存在，设置默认值为0） -->
         0
         </#if>
         )
@@ -75,12 +75,12 @@
         ${table.baseColumns?map(column -> column.columnName)?join(", ")}<#if (table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
         <!-- 业务字段 -->
         ${table.columns?map(column -> column.columnName)?join(", ")}<#if (table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
-        <!-- deleteFlag字段（如果存在） -->
         <#if table.deleteFlagColumn??>
+        <!-- deleteFlag字段（如果存在） -->
         ${table.deleteFlagColumn.columnName}<#if table.versionColumn??>,</#if>
         </#if>
-        <!-- version字段（如果存在） -->
         <#if table.versionColumn??>
+        <!-- version字段（如果存在） -->
         ${table.versionColumn.columnName}
         </#if>
         ) VALUES
@@ -94,12 +94,12 @@
             ${table.baseColumns?map(column -> "#{"+"item."+column.propertyName+", jdbcType="+column.columnType+"}")?join(", ")}<#if (table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
             <!-- 业务字段值 -->
             ${table.columns?map(column -> "#{"+"item."+column.propertyName+", jdbcType="+column.columnType+"}")?join(", ")}<#if (table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
-            <!-- deleteFlag字段值（如果存在，设置默认值为0） -->
             <#if table.deleteFlagColumn??>
+            <!-- deleteFlag字段值（如果存在，设置默认值为0） -->
             0<#if table.versionColumn??>,</#if>
             </#if>
-            <!-- version字段值（如果存在，设置默认值为0） -->
             <#if table.versionColumn??>
+            <!-- version字段值（如果存在，设置默认值为0） -->
             0
             </#if>
             )
@@ -124,16 +124,16 @@
                 ${column.columnName} = <#noparse>#{</#noparse>${column.propertyName}, jdbcType=${column.columnType}<#noparse>}</#noparse>,
             </if>
             </#list>
-            <!-- version字段更新（如果存在，版本号自增） -->
             <#if table.versionColumn??>
+            <!-- version字段更新（如果存在，版本号自增） -->
             ${table.versionColumn.columnName} = ${table.versionColumn.columnName} + 1
             </#if>
         </set>
         WHERE ${table.primaryKey.columnName} = <#noparse>#{</#noparse>${table.primaryKey.propertyName}, jdbcType=${table.primaryKey.columnType}<#noparse>}</#noparse>
     </update>
+    <#if table.versionColumn??>
 
     <!-- 根据ID和Version更新记录（乐观锁更新，包含基础字段和业务字段） -->
-    <#if table.versionColumn??>
     <update id="updateByVersion" parameterType="${config.getPoPackage()}.${table.entityName}Po">
         UPDATE ${table.tableName}
         <set>
@@ -159,8 +159,8 @@
     </update>
     </#if>
 
-    <!-- 根据ID删除记录（逻辑删除：将delete_flag设置为true） -->
     <#if table.deleteFlagColumn??>
+    <!-- 根据ID删除记录（逻辑删除：将delete_flag设置为true） -->
     <update id="delete" parameterType="${table.primaryKey.javaType}">
         UPDATE ${table.tableName}
         <set>
@@ -171,6 +171,7 @@
         AND (${table.deleteFlagColumn.columnName} = 0 OR ${table.deleteFlagColumn.columnName} IS NULL)
     </update>
     <#else>
+    <!-- 根据ID删除记录（物理删除记录） -->
     <delete id="delete" parameterType="${table.primaryKey.javaType}">
         DELETE FROM ${table.tableName}
         WHERE ${table.primaryKey.columnName} = <#noparse>#{</#noparse>id, jdbcType=${table.primaryKey.columnType}<#noparse>}</#noparse>
@@ -186,18 +187,18 @@
         ${table.baseColumns?map(column -> column.columnName)?join(", ")}<#if (table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
         <!-- 业务字段 -->
         ${table.columns?map(column -> column.columnName)?join(", ")}<#if (table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
-        <!-- deleteFlag字段（如果存在） -->
         <#if table.deleteFlagColumn??>
+        <!-- deleteFlag字段（如果存在） -->
         ${table.deleteFlagColumn.columnName}<#if table.versionColumn??>,</#if>
         </#if>
-        <!-- version字段（如果存在） -->
         <#if table.versionColumn??>
+        <!-- version字段（如果存在） -->
         ${table.versionColumn.columnName}
         </#if>
         FROM ${table.tableName}
         WHERE ${table.primaryKey.columnName} = <#noparse>#{</#noparse>id, jdbcType=${table.primaryKey.columnType}<#noparse>}</#noparse>
-        <!-- 过滤已删除的记录 -->
         <#if table.deleteFlagColumn??>
+        <!-- 过滤已删除的记录 -->
         AND (${table.deleteFlagColumn.columnName} = 0 OR ${table.deleteFlagColumn.columnName} IS NULL)
         </#if>
     </select>
@@ -211,12 +212,12 @@
         ${table.baseColumns?map(column -> column.columnName)?join(", ")}<#if (table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
         <!-- 业务字段 -->
         ${table.columns?map(column -> column.columnName)?join(", ")}<#if (table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
-        <!-- deleteFlag字段（如果存在） -->
         <#if table.deleteFlagColumn??>
+        <!-- deleteFlag字段（如果存在） -->
         ${table.deleteFlagColumn.columnName}<#if table.versionColumn??>,</#if>
         </#if>
-        <!-- version字段（如果存在） -->
         <#if table.versionColumn??>
+        <!-- version字段（如果存在） -->
         ${table.versionColumn.columnName}
         </#if>
         FROM ${table.tableName}
@@ -235,13 +236,13 @@
             <#list table.baseColumns as column>
             <#if column.propertyName == "createTime">
             <if test="${column.propertyName} != null">
-                <if test="${column.propertyName}[0] != null and (${column.propertyName}.length lt 2 or ${column.propertyName}[1] == null)">
+                <if test="${column.propertyName}[0] != '' and (${column.propertyName}.size() lt 2 or ${column.propertyName}[1] == '')">
                     AND ${column.columnName} >= <#noparse>#{</#noparse>${column.propertyName}[0], jdbcType=TIMESTAMP<#noparse>}</#noparse>
                 </if>
-                <if test="${column.propertyName}.length >= 2 and ${column.propertyName}[0] == null and ${column.propertyName}[1] != null">
+                <if test="${column.propertyName}.size() >= 2 and ${column.propertyName}[0] == '' and ${column.propertyName}[1] != ''">
                     AND ${column.columnName} &lt;= <#noparse>#{</#noparse>${column.propertyName}[1], jdbcType=TIMESTAMP<#noparse>}</#noparse>
                 </if>
-                <if test="${column.propertyName}.length >= 2 and ${column.propertyName}[0] != null and ${column.propertyName}[1] != null">
+                <if test="${column.propertyName}.size() >= 2 and ${column.propertyName}[0] != '' and ${column.propertyName}[1] != ''">
                     AND ${column.columnName} BETWEEN <#noparse>#{</#noparse>${column.propertyName}[0], jdbcType=TIMESTAMP<#noparse>}</#noparse>
                     AND <#noparse>#{</#noparse>${column.propertyName}[1], jdbcType=TIMESTAMP<#noparse>}</#noparse>
                 </if>
@@ -249,22 +250,16 @@
             </#if>
             <#if column.propertyName == "updateTime">
             <if test="${column.propertyName} != null">
-                <if test="${column.propertyName}[0] != null and (${column.propertyName}.length lt 2 or ${column.propertyName}[1] == null)">
+                <if test="${column.propertyName}[0] != '' and (${column.propertyName}.size() lt 2 or ${column.propertyName}[1] == '')">
                     AND ${column.columnName} >= <#noparse>#{</#noparse>${column.propertyName}[0], jdbcType=TIMESTAMP<#noparse>}</#noparse>
                 </if>
-                <if test="${column.propertyName}.length >= 2 and ${column.propertyName}[0] == null and ${column.propertyName}[1] != null">
+                <if test="${column.propertyName}.size() >= 2 and ${column.propertyName}[0] == '' and ${column.propertyName}[1] != ''">
                     AND ${column.columnName} &lt;= <#noparse>#{</#noparse>${column.propertyName}[1], jdbcType=TIMESTAMP<#noparse>}</#noparse>
                 </if>
-                <if test="${column.propertyName}.length >= 2 and ${column.propertyName}[0] != null and ${column.propertyName}[1] != null">
+                <if test="${column.propertyName}.size() >= 2 and ${column.propertyName}[0] != '' and ${column.propertyName}[1] != ''">
                     AND ${column.columnName} BETWEEN <#noparse>#{</#noparse>${column.propertyName}[0], jdbcType=TIMESTAMP<#noparse>}</#noparse>
                     AND <#noparse>#{</#noparse>${column.propertyName}[1], jdbcType=TIMESTAMP<#noparse>}</#noparse>
                 </if>
-            </if>
-            </#if>
-            <#if column.propertyName == "version">
-            <!-- version字段精确匹配筛选 -->
-            <if test="${column.propertyName} != null">
-                AND ${column.columnName} = <#noparse>#{</#noparse>${column.propertyName}, jdbcType=${column.columnType}<#noparse>}</#noparse>
             </if>
             </#if>
             </#list>
@@ -274,14 +269,10 @@
                 AND ${column.columnName} = <#noparse>#{</#noparse>${column.propertyName}, jdbcType=${column.columnType}<#noparse>}</#noparse>
             </if>
             </#list>
-            <!-- 过滤已删除的记录 -->
             <#if table.deleteFlagColumn??>
+            <!-- 过滤已删除的记录 -->
             AND (${table.deleteFlagColumn.columnName} = 0 OR ${table.deleteFlagColumn.columnName} IS NULL)
             </#if>
         </where>
-        <!-- 分页逻辑 -->
-        <if test="limit != null and offset != null">
-            LIMIT <#noparse>#{</#noparse>offset<#noparse>}</#noparse>, <#noparse>#{</#noparse>limit<#noparse>}</#noparse>
-        </if>
     </select>
 </mapper>

@@ -4,6 +4,7 @@ import com.g2rain.common.exception.SystemErrorCode;
 import com.g2rain.common.id.IdGenerator;
 import com.g2rain.common.model.PageData;
 import com.g2rain.common.utils.Asserts;
+import com.g2rain.common.utils.Moments;
 import ${config.getConverterPackage()}.${table.entityName}Converter;
 import ${config.getDaoPackage()}.${table.entityName}Dao;
 import ${config.getPoPackage()}.${table.entityName}Po;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -71,10 +73,14 @@ public class ${table.entityName}ServiceImpl implements ${table.entityName}Servic
         if (Objects.isNull(id) || id == 0) {
             // 新增：使用IdGenerator生成主键
             entity.set${table.primaryKey.propertyName?cap_first}(idGenerator.generateId());
+            LocalDateTime now = Moments.now();
+            entity.setUpdateTime(now);
+            entity.setCreateTime(now);
             int success = ${table.entityNameLower}Dao.insert(entity);
             Asserts.greaterThan(success, 0, SystemErrorCode.CREATE_DATA_ERROR);
         } else {
             // 更新：直接更新
+            entity.setUpdateTime(Moments.now());
             int success = ${table.entityNameLower}Dao.update(entity);
             Asserts.greaterThan(success, 0, SystemErrorCode.UPDATE_DATA_ERROR, id);
         }

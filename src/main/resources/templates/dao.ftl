@@ -46,8 +46,8 @@ public interface ${table.entityName}Dao {
      * @return 影响行数
      */
     int delete(${table.primaryKey.javaType} id);
-
     <#if table.versionColumn??>
+
     /**
      * 根据ID和Version更新记录（乐观锁更新）
      *

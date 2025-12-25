@@ -55,7 +55,7 @@ import java.math.BigDecimal;
 public class ${table.entityName}Po extends BasePo {
     <#-- 2. 业务字段（表特有核心字段，BasePo未包含，单独定义，排除deleteFlag和version） -->
     <#list table.columns as column>
-    <#if column != table.deleteFlagColumn && column != table.versionColumn>
+    <#if !column.isDeleteFlag() && !column.isVersion()>
 
     /**
      * ${column.columnComment!''}
@@ -63,20 +63,12 @@ public class ${table.entityName}Po extends BasePo {
     private ${column.javaType} ${column.propertyName};
     </#if>
     </#list>
-
     <#-- deleteFlag字段（如果存在） -->
     <#if table.deleteFlagColumn??>
+
     /**
      * ${table.deleteFlagColumn.columnComment!''}
      */
     private ${table.deleteFlagColumn.javaType} ${table.deleteFlagColumn.propertyName};
-    </#if>
-
-    <#-- version字段（如果存在） -->
-    <#if table.versionColumn??>
-    /**
-     * ${table.versionColumn.columnComment!''}
-     */
-    private ${table.versionColumn.javaType} ${table.versionColumn.propertyName};
     </#if>
 }
