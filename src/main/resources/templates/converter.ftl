@@ -36,9 +36,19 @@ public interface ${table.entityName}Converter {
     /**
      * Dto -> Po
      * 自动将 createTime 和 updateTime 从 {@link String} 转换为 {@link LocalDateTime}
+     <#if table.versionColumn??>
      * 忽略 version 字段
+     </#if>
+     <#if table.deleteFlagColumn??>
+     * 忽略 deleteFlag 字段
+     </#if>
      */
+    <#if table.versionColumn??>
     @Mapping(target = "version", ignore = true)
+    </#if>
+    <#if table.deleteFlagColumn??>
+    @Mapping(target = "deleteFlag", ignore = true)
+    </#if>
     @Mapping(target = "createTime", source = "createTime", qualifiedByName = "stringToLocalDateTime")
     @Mapping(target = "updateTime", source = "updateTime", qualifiedByName = "stringToLocalDateTime")
     ${table.entityName}Po dto2po(${table.entityName}Dto dto);
