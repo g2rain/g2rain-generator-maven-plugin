@@ -28,8 +28,8 @@
     <!-- 插入单条记录 -->
     <insert id="insert" parameterType="${config.getPoPackage()}.${table.entityName}Po">
         INSERT INTO ${table.tableName} (
-        <!-- 主键字段（自增主键不包含在插入语句中） -->
         <#if !table.primaryKey.autoIncrement>
+        <!-- 主键字段（自增主键不包含在插入语句中） -->
         ${table.primaryKey.columnName}<#if (table.baseColumns?size > 0 || table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
         </#if>
         <!-- 基础字段 -->
@@ -45,8 +45,8 @@
         ${table.versionColumn.columnName}
         </#if>
         ) VALUES (
-        <!-- 主键值（自增主键不包含） -->
         <#if !table.primaryKey.autoIncrement>
+        <!-- 主键值（自增主键不包含） -->
         <#noparse>#{</#noparse>${table.primaryKey.propertyName}, jdbcType=${table.primaryKey.columnType}<#noparse>}</#noparse><#if (table.baseColumns?size > 0 || table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
         </#if>
         <!-- 基础字段值 -->
@@ -67,8 +67,8 @@
     <!-- 批量插入记录 -->
     <insert id="insertMultiple" parameterType="java.util.List">
         INSERT INTO ${table.tableName} (
-        <!-- 主键字段（自增主键不包含） -->
         <#if !table.primaryKey.autoIncrement>
+        <!-- 主键字段（自增主键不包含） -->
         ${table.primaryKey.columnName}<#if (table.baseColumns?size > 0 || table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
         </#if>
         <!-- 基础字段 -->
@@ -86,8 +86,8 @@
         ) VALUES
         <foreach collection="list" item="item" separator=",">
             (
-            <!-- 主键值（自增主键不包含） -->
             <#if !table.primaryKey.autoIncrement>
+            <!-- 主键值（自增主键不包含） -->
             <#noparse>#{</#noparse>item.${table.primaryKey.propertyName}, jdbcType=${table.primaryKey.columnType}<#noparse>}</#noparse><#if (table.baseColumns?size > 0 || table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
             </#if>
             <!-- 基础字段值 -->

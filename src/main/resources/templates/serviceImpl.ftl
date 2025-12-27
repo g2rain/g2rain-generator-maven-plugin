@@ -1,7 +1,9 @@
 package ${config.getServicePackage()}.impl;
 
 import com.g2rain.common.exception.SystemErrorCode;
+<#if !table.primaryKey?? || !table.primaryKey.autoIncrement>
 import com.g2rain.common.id.IdGenerator;
+</#if>
 import com.g2rain.common.model.PageData;
 import com.g2rain.common.utils.Asserts;
 import com.g2rain.common.utils.Moments;
@@ -15,8 +17,10 @@ import ${config.getVoPackage()}.${table.entityName}Vo;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.page.PageMethod;
 import jakarta.annotation.Resource;
+<#if !table.primaryKey?? || !table.primaryKey.autoIncrement>
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+</#if>
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,6 +38,7 @@ public class ${table.entityName}ServiceImpl implements ${table.entityName}Servic
 
     @Resource(name = "${table.entityNameLower}Dao")
     private ${table.entityName}Dao ${table.entityNameLower}Dao;
+    <#if !table.primaryKey?? || !table.primaryKey.autoIncrement>
 
     private IdGenerator idGenerator;
 
@@ -42,6 +47,7 @@ public class ${table.entityName}ServiceImpl implements ${table.entityName}Servic
     public void setIdGenerator(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
+    </#if>
 
     @Override
     public List<${table.entityName}Vo> selectList(${table.entityName}SelectDto selectDto) {
@@ -71,8 +77,10 @@ public class ${table.entityName}ServiceImpl implements ${table.entityName}Servic
         // 判断是新增还是更新
         ${table.primaryKey.javaType} id = entity.get${table.primaryKey.propertyName?cap_first}();
         if (Objects.isNull(id) || id == 0) {
+            <#if !table.primaryKey?? || !table.primaryKey.autoIncrement>
             // 新增：使用IdGenerator生成主键
             entity.set${table.primaryKey.propertyName?cap_first}(idGenerator.generateId());
+            </#if>
             LocalDateTime now = Moments.now();
             entity.setUpdateTime(now);
             entity.setCreateTime(now);
