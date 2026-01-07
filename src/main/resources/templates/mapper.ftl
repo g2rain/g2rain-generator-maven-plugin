@@ -25,6 +25,42 @@
         </#if>
     </resultMap>
 
+    <!-- 定义可复用排序方向片段 -->
+    <sql id="directionClause">
+        <choose>
+            <when test="item.direction == 'DESC'">DESC</when>
+            <otherwise>ASC</otherwise>
+        </choose>
+    </sql>
+
+    <!-- 可复用的动态排序 SQL 片段 -->
+    <sql id="dynamicOrderBy">
+        <trim prefix="ORDER BY" suffixOverrides=",">
+            <foreach collection="safeSorts" item="item" separator=",">
+                <choose>
+                    <#if table.primaryKey??>
+                    <when test="item.column == '${table.primaryKey.propertyName}'">
+                        ${table.primaryKey.columnName}
+                        <include refid="directionClause"/>
+                    </when>
+                    </#if>
+                    <#list table.baseColumns as column>
+                    <when test="item.column == '${column.propertyName}'">
+                        ${column.columnName}
+                        <include refid="directionClause"/>
+                    </when>
+                    </#list>
+                    <#list table.columns as column>
+                    <when test="item.column == '${column.propertyName}'">
+                        ${column.columnName}
+                        <include refid="directionClause"/>
+                    </when>
+                    </#list>
+                </choose>
+            </foreach>
+        </trim>
+    </sql>
+
     <!-- 插入单条记录 -->
     <insert id="insert" parameterType="${config.getPoPackage()}.${table.entityName}Po">
         INSERT INTO ${table.tableName} (
@@ -274,5 +310,6 @@
             AND (${table.deleteFlagColumn.columnName} = 0 OR ${table.deleteFlagColumn.columnName} IS NULL)
             </#if>
         </where>
+        <include refid="dynamicOrderBy"/>
     </select>
 </mapper>
