@@ -1,6 +1,7 @@
 package ${config.getControllerPackage()};
 
 import com.g2rain.common.model.PageData;
+import com.g2rain.common.model.PageSelectListDto;
 import com.g2rain.common.model.Result;
 import ${config.getApiPackage()}.${table.entityName}Api;
 import ${config.getDtoPackage()}.${table.entityName}Dto;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
 /**
@@ -35,7 +37,7 @@ public class ${table.entityName}Controller implements ${table.entityName}Api {
     }
 
     @Override
-    public Result<PageData<${table.entityName}Vo>> selectPage(${table.entityName}SelectDto selectDto) {
+    public Result<PageData<${table.entityName}Vo>> selectPage(PageSelectListDto<${table.entityName}SelectDto> selectDto) {
         return Result.successPage(${table.entityNameLower}Service.selectPage(selectDto));
     }
 

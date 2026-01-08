@@ -5,6 +5,7 @@ import com.g2rain.common.exception.SystemErrorCode;
 import com.g2rain.common.id.IdGenerator;
 </#if>
 import com.g2rain.common.model.PageData;
+import com.g2rain.common.model.PageSelectListDto;
 import com.g2rain.common.utils.Asserts;
 import com.g2rain.common.utils.Moments;
 import ${config.getConverterPackage()}.${table.entityName}Converter;
@@ -58,9 +59,9 @@ public class ${table.entityName}ServiceImpl implements ${table.entityName}Servic
     }
 
     @Override
-    public PageData<${table.entityName}Vo> selectPage(${table.entityName}SelectDto selectDto) {
+    public PageData<${table.entityName}Vo> selectPage(PageSelectListDto<${table.entityName}SelectDto> selectDto) {
         try (Page<${table.entityName}Po> page = PageMethod.startPage(selectDto.getPageNum(), selectDto.getPageSize())) {
-            ${table.entityNameLower}Dao.selectList(selectDto);
+            ${table.entityNameLower}Dao.selectList(selectDto.getQuery());
             List<${table.entityName}Vo> result = page.getResult()
                     .stream()
                     .map(${table.entityName}Converter.INSTANCE::po2vo)

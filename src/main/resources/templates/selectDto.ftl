@@ -4,7 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import com.g2rain.common.model.BasePageSelectListDto;
+import com.g2rain.common.model.BaseSelectListDto;
 
 <#-- 按需导入字段类型依赖 -->
 <#-- 初始化标志变量 -->
@@ -52,7 +52,7 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class ${table.entityName}SelectDto extends BasePageSelectListDto {
+public class ${table.entityName}SelectDto extends BaseSelectListDto {
     <#-- 生成表特有字段（排除父类已包含的字段，排除deleteFlag和version） -->
     <#list table.columns as column>
     <#-- 排除主键相关字段（父类已有id和ids） -->

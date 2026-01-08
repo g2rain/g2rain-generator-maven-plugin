@@ -1,6 +1,7 @@
 package ${config.getApiPackage()};
 
 import com.g2rain.common.model.PageData;
+import com.g2rain.common.model.PageSelectListDto;
 import com.g2rain.common.model.Result;
 import ${config.getDtoPackage()}.${table.entityName}SelectDto;
 import ${config.getVoPackage()}.${table.entityName}Vo;
@@ -33,5 +34,5 @@ public interface ${table.entityName}Api {
      * @return 分页数据
      */
     @GetMapping("/page")
-    Result<PageData<${table.entityName}Vo>> selectPage(${table.entityName}SelectDto selectDto);
+    Result<PageData<${table.entityName}Vo>> selectPage(PageSelectListDto<${table.entityName}SelectDto> selectDto);
 }

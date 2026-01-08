@@ -1,9 +1,11 @@
 package ${config.getServicePackage()};
 
-import ${config.getVoPackage()}.${table.entityName}Vo;
-import ${config.getDtoPackage()}.${table.entityName}SelectDto;
-import ${config.getDtoPackage()}.${table.entityName}Dto;
 import com.g2rain.common.model.PageData;
+import com.g2rain.common.model.PageSelectListDto;
+import ${config.getDtoPackage()}.${table.entityName}Dto;
+import ${config.getDtoPackage()}.${table.entityName}SelectDto;
+import ${config.getVoPackage()}.${table.entityName}Vo;
+
 import java.util.List;
 
 /**
@@ -28,7 +30,7 @@ public interface ${table.entityName}Service {
      * @param selectDto 查询条件DTO（包含分页参数）
      * @return 分页VO数据
      */
-    PageData<${table.entityName}Vo> selectPage(${table.entityName}SelectDto selectDto);
+    PageData<${table.entityName}Vo> selectPage(PageSelectListDto<${table.entityName}SelectDto> selectDto);
 
     /**
      * 新增或更新数据
