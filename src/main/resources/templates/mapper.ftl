@@ -200,7 +200,7 @@
     <update id="delete" parameterType="${table.primaryKey.javaType}">
         UPDATE ${table.tableName}
         <set>
-            ${table.deleteFlagColumn.columnName} = 1
+            ${table.deleteFlagColumn.columnName} = 1<#if table.versionColumn??>, ${table.versionColumn.columnName} = ${table.versionColumn.columnName} + 1</#if>
         </set>
         WHERE ${table.primaryKey.columnName} = <#noparse>#{</#noparse>id, jdbcType=${table.primaryKey.columnType}<#noparse>}</#noparse>
         <!-- 只删除未删除的记录 -->
