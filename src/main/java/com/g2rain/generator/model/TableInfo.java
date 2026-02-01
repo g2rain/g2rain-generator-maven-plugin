@@ -2,6 +2,7 @@ package com.g2rain.generator.model;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -57,7 +58,7 @@ public class TableInfo {
      * 普通字段列表（不包含主键和基础字段）
      * <p>每个元素为 {@link ColumnInfo} 对象，描述字段名、类型、注释等</p>
      */
-    private List<ColumnInfo> columns;
+    private List<ColumnInfo> columns = new ArrayList<>();
 
     /**
      * 主键字段信息
@@ -69,7 +70,7 @@ public class TableInfo {
      * 基础字段列表，如 create_time、update_time、version 等
      * <p>这些字段通常由框架统一处理，不会在业务实体中重复生成</p>
      */
-    private List<ColumnInfo> baseColumns;
+    private List<ColumnInfo> baseColumns = new ArrayList<>();
 
     /**
      * delete_flag字段信息（如果存在）
