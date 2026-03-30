@@ -15,8 +15,8 @@ import ${config.getDtoPackage()}.${table.entityName}Dto;
 import ${config.getDtoPackage()}.${table.entityName}SelectDto;
 import ${config.getServicePackage()}.${table.entityName}Service;
 import ${config.getVoPackage()}.${table.entityName}Vo;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.page.PageMethod;
+import com.g2rain.mybatis.pagination.PageContext;
+import com.g2rain.mybatis.pagination.model.Page;
 import jakarta.annotation.Resource;
 <#if !table.primaryKey?? || !table.primaryKey.autoIncrement>
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,14 +60,14 @@ public class ${table.entityName}ServiceImpl implements ${table.entityName}Servic
 
     @Override
     public PageData<${table.entityName}Vo> selectPage(PageSelectListDto<${table.entityName}SelectDto> selectDto) {
-        try (Page<${table.entityName}Po> page = PageMethod.startPage(selectDto.getPageNum(), selectDto.getPageSize())) {
+        Page<${table.entityName}Po> page = PageContext.of(selectDto.getPageNum(), selectDto.getPageSize(), () -> {
             ${table.entityNameLower}Dao.selectList(selectDto.getQuery());
-            List<${table.entityName}Vo> result = page.getResult()
-                    .stream()
-                    .map(${table.entityName}Converter.INSTANCE::po2vo)
-                    .toList();
-            return PageData.of(page.getPageNum(), page.getPageSize(), page.getTotal(), result);
-        }
+        });
+        List<${table.entityName}Vo> result = page.getResult()
+                .stream()
+                .map(${table.entityName}Converter.INSTANCE::po2vo)
+                .toList();
+        return PageData.of(page.getPageNum(), page.getPageSize(), page.getTotal(), result);
     }
 
     @Override
