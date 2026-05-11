@@ -1,6 +1,7 @@
 package ${config.getDtoPackage()};
 
 import com.g2rain.common.model.BaseDto;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -51,6 +52,7 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@Schema(description = "${table.tableComment!''} DTO")
 public class ${table.entityName}Dto extends BaseDto {
     <#-- 生成表特有字段（排除主键和基础类已包含的字段） -->
     <#list table.columns as column>
@@ -64,6 +66,7 @@ public class ${table.entityName}Dto extends BaseDto {
     /**
      * ${column.columnComment!''}
      */
+    @Schema(description = "${column.columnComment!''}")
     private ${column.javaType} ${column.propertyName};
     </#if>
     </#if>

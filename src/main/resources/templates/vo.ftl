@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import com.g2rain.common.model.BaseVo;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 <#-- 按需导入字段类型依赖 -->
 <#-- 初始化标志变量 -->
@@ -57,6 +58,7 @@ import com.g2rain.common.json.AdminCompanyCondition;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@Schema(description = "${table.tableComment!''} VO")
 public class ${table.entityName}Vo extends BaseVo {
     <#-- 2. 业务字段（表特有核心字段，BaseVo未包含，单独定义，排除deleteFlag和version） -->
     <#list table.columns as column>
@@ -65,6 +67,7 @@ public class ${table.entityName}Vo extends BaseVo {
     /**
      * ${column.columnComment!''}
      */
+    @Schema(description = "${column.columnComment!''}")
     private ${column.javaType} ${column.propertyName};
     </#if>
     </#list>
@@ -74,6 +77,7 @@ public class ${table.entityName}Vo extends BaseVo {
     /**
      * ${table.deleteFlagColumn.columnComment!''}
      */
+    @Schema(description = "删除标识（0 未删除，1 已删除）", example = "false")
     @ConditionalJsonIgnore(adminCompany = AdminCompanyCondition.TRUE)
     private ${table.deleteFlagColumn.javaType} ${table.deleteFlagColumn.propertyName};
     </#if>

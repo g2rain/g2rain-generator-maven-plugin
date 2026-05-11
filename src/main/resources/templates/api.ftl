@@ -5,6 +5,8 @@ import com.g2rain.common.model.PageSelectListDto;
 import com.g2rain.common.model.Result;
 import ${config.getDtoPackage()}.${table.entityName}SelectDto;
 import ${config.getVoPackage()}.${table.entityName}Vo;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.List;
  *
  * @author ${config.getAuthor()}
  */
+@Tag(name = "${table.tableComment!''}", description = "${table.tableName}相关接口")
 public interface ${table.entityName}Api {
 
     /**
@@ -25,6 +28,7 @@ public interface ${table.entityName}Api {
      * @return 数据列表
      */
     @GetMapping("/list")
+    @Operation(summary = "查询${table.tableName}列表", description = "根据查询条件返回${table.tableName}列表")
     Result<List<${table.entityName}Vo>> selectList(${table.entityName}SelectDto selectDto);
 
     /**
@@ -34,5 +38,6 @@ public interface ${table.entityName}Api {
      * @return 分页数据
      */
     @GetMapping("/page")
+    @Operation(summary = "分页查询${table.tableName}列表", description = "分页查询${table.tableName}列表")
     Result<PageData<${table.entityName}Vo>> selectPage(PageSelectListDto<${table.entityName}SelectDto> selectDto);
 }
