@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author ${config.getAuthor()}
  */
-@Tag(name = "${table.tableComment!''}", description = "${table.tableComment}相关接口")
+@Tag(name = "${table.tableComment!''}", description = "${table.tableName}相关接口")
 public interface ${table.entityName}Api {
 
     /**
@@ -28,7 +28,7 @@ public interface ${table.entityName}Api {
      * @return 数据列表
      */
     @GetMapping("/list")
-    @Operation(summary = "查询${table.tableComment}列表", description = "根据查询条件返回${table.tableComment}列表")
+    @Operation(summary = "查询${table.tableName}列表", description = "根据查询条件返回${table.tableName}列表")
     Result<List<${table.entityName}Vo>> selectList(${table.entityName}SelectDto selectDto);
 
     /**
@@ -38,6 +38,6 @@ public interface ${table.entityName}Api {
      * @return 分页数据
      */
     @GetMapping("/page")
-    @Operation(summary = "分页查询${table.tableComment}列表", description = "分页查询${table.tableComment}列表")
+    @Operation(summary = "分页查询${table.tableName}列表", description = "分页查询${table.tableName}列表")
     Result<PageData<${table.entityName}Vo>> selectPage(PageSelectListDto<${table.entityName}SelectDto> selectDto);
 }
