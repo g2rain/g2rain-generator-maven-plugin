@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import com.g2rain.common.model.BaseSelectListDto;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 <#-- 按需导入字段类型依赖 -->
 <#-- 初始化标志变量 -->
@@ -52,6 +53,7 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@Schema(description = "${table.tableComment!''}查询入参 DTO")
 public class ${table.entityName}SelectDto extends BaseSelectListDto {
     <#-- 生成表特有字段（排除父类已包含的字段，排除deleteFlag和version） -->
     <#list table.columns as column>
@@ -65,6 +67,7 @@ public class ${table.entityName}SelectDto extends BaseSelectListDto {
     /**
      * ${column.columnComment!''}
      */
+    @Schema(description = "${column.columnComment!''}")
     private ${column.javaType} ${column.propertyName};
     </#if>
     </#if>
