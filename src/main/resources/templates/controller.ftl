@@ -44,14 +44,14 @@ public class ${table.entityName}Controller implements ${table.entityName}Api {
     }
 
     @PostMapping("/save")
-    @Operation(summary = "新增或更新${table.tableName}信息", description = "新增或更新${table.tableName}基础信息")
+    @Operation(summary = "新增或更新${table.tableComment}信息", description = "新增或更新${table.tableComment}基础信息")
     public Result<${table.primaryKey.javaType}> save(@RequestBody ${table.entityName}Dto dto) {
         return Result.success(${table.entityNameLower}Service.save(dto));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "删除${table.tableName}记录", description = "根据主键删除${table.tableName}记录")
-    public Result<Integer> delete(@Parameter(description = "${table.tableName}标识") @PathVariable ${table.primaryKey.javaType} id) {
+    @Operation(summary = "删除${table.tableComment}记录", description = "根据主键删除${table.tableComment}记录")
+    public Result<Integer> delete(@Parameter(description = "${table.tableComment}标识") @PathVariable ${table.primaryKey.javaType} id) {
         return Result.success(${table.entityNameLower}Service.delete(id));
     }
 }
