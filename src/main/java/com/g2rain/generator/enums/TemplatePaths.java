@@ -251,7 +251,12 @@ public enum TemplatePaths {
      * 路径格式："{0}/{1}/{3}" -> 使用 modulePath、baseFileDir、文件名
      * skipIfExists：true -> 文件存在则不覆盖
      */
-    APP_DEV_YML(SHARED_STARTUP, "application-dev.yml.ftl", Constants.RESOURCES_FILE_DIR, "", "application-dev.yml", Constants.PATH_FORMAT_WITHOUT_PACKAGE, true);
+    APP_DEV_YML(SHARED_STARTUP, "application-dev.yml.ftl", Constants.RESOURCES_FILE_DIR, "", "application-dev.yml", Constants.PATH_FORMAT_WITHOUT_PACKAGE, true),
+
+    /**
+     * application-nacos.yml 配置模板
+     */
+    APP_NACOS_YML(SHARED_STARTUP, "application-nacos.yml.ftl", Constants.RESOURCES_FILE_DIR, "", "application-nacos.yml", Constants.PATH_FORMAT_WITHOUT_PACKAGE, true);
 
     /**
      * 模块后缀，用于构建模块目录。
@@ -414,5 +419,12 @@ public enum TemplatePaths {
         String fileName = MessageFormat.format(this.classSuffix, entityName);
         String fullPath = MessageFormat.format(this.pathFormat, modulePath, this.baseFileDir, packagePath, fileName);
         return Path.of(fullPath).toAbsolutePath().normalize();
+    }
+
+    /**
+     * 是否为项目级共享模板（不依赖单表循环）。
+     */
+    public boolean isSharedTemplate() {
+        return this == APP_YML || this == APP_DEV_YML || this == APP_NACOS_YML;
     }
 }

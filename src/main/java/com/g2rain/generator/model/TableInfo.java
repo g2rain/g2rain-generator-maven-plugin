@@ -3,7 +3,10 @@ package com.g2rain.generator.model;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * 数据库表元信息封装类，用于 MyBatis Generator 或代码生成器使用。
@@ -81,4 +84,52 @@ public class TableInfo {
      * version字段信息（如果存在）
      */
     private ColumnInfo versionColumn;
+
+    /**
+     * 合并主键、基础字段、业务字段及特殊字段，按列名去重（大小写不敏感）。
+     */
+    public List<ColumnInfo> getAllColumns() {
+        Map<String, ColumnInfo> merged = new LinkedHashMap<>();
+        addColumn(merged, primaryKey);
+        if (baseColumns != null) {
+            baseColumns.forEach(column -> addColumn(merged, column));
+        }
+        if (columns != null) {
+            columns.forEach(column -> addColumn(merged, column));
+        }
+        addColumn(merged, deleteFlagColumn);
+        addColumn(merged, versionColumn);
+        return new ArrayList<>(merged.values());
+    }
+
+    /**
+     * 按数据库列名判断字段是否存在（大小写不敏感）。
+     */
+    public boolean hasColumn(String columnName) {
+        return getColumn(columnName) != null;
+    }
+
+    /**
+     * 按数据库列名获取字段信息（大小写不敏感）。
+     */
+    public ColumnInfo getColumn(String columnName) {
+        if (columnName == null || columnName.isBlank()) {
+            return null;
+        }
+        String normalized = columnName.toLowerCase(Locale.ROOT);
+        for (ColumnInfo column : getAllColumns()) {
+            if (column.getColumnName() != null
+                && column.getColumnName().toLowerCase(Locale.ROOT).equals(normalized)) {
+                return column;
+            }
+        }
+        return null;
+    }
+
+    private void addColumn(Map<String, ColumnInfo> merged, ColumnInfo column) {
+        if (column == null || column.getColumnName() == null) {
+            return;
+        }
+        merged.putIfAbsent(column.getColumnName().toLowerCase(Locale.ROOT), column);
+    }
 }
