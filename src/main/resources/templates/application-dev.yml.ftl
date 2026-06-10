@@ -1,13 +1,4 @@
-# profile=dev 时加载；与 nacos 互斥，勿同时激活
 spring:
-  cloud:
-    nacos:
-      config:
-        enabled: false
-        import-check:
-          enabled: false
-      discovery:
-        enabled: false
   datasource:
     host: ${config.getHost()}
     port: ${config.getPort()}
@@ -24,7 +15,3 @@ spring:
       minimum-idle: 1
       maximum-pool-size: 10
       connection-test-query: select 1
-
-logging:
-  level:
-    ${config.getDaoPackage()}: debug
