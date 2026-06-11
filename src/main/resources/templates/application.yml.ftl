@@ -7,6 +7,9 @@ spring:
       enabled: true
   application:
     name: <#if config.getProjectName()??>${config.getProjectName()}<#else>g2rain-demo</#if>
+  # 环境切换（dev / nacos 互斥，勿同时激活或 spring.profiles.include）：
+  #   SPRING_PROFILES_ACTIVE=dev   → application.yml + application-dev.yml（本地数据源）
+  #   SPRING_PROFILES_ACTIVE=nacos → application.yml + application-nacos.yml（注册/配置中心，数据源来自 Nacos）
   profiles:
     active: $<#noparse>{SPRING_PROFILES_ACTIVE:dev}</#noparse>
   servlet:
@@ -44,7 +47,3 @@ management:
   endpoint:
     health:
       show-details: when_authorized
-
-logging:
-  level:
-    ${config.getDaoPackage()}: debug
