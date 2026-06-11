@@ -1,3 +1,4 @@
+# profile=nacos 时加载；与 dev 互斥，数据源等运行时配置由 Nacos 配置中心提供
 spring:
   cloud:
     # http://192.168.1.20:8080/index.html#/register
