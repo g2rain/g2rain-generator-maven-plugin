@@ -2,6 +2,8 @@ package com.g2rain.generator.config;
 
 
 import com.g2rain.generator.enums.TemplatePaths;
+import com.g2rain.generator.model.ColumnInfo;
+import com.g2rain.generator.model.TableInfo;
 import com.g2rain.generator.utils.Constants;
 import com.g2rain.generator.utils.Strings;
 import lombok.Getter;
@@ -123,6 +125,24 @@ public class FoundryConfig extends GeneratorConfig {
      * 数据库名称
      */
     private final String database;
+
+    /**
+     * 是否为租户表生成数据隔离相关代码，默认 true。
+     */
+    @Setter
+    private boolean withIsolation = true;
+
+    /**
+     * 租户列识别，逗号分隔，默认 organ_id。
+     */
+    @Setter
+    private String tenantColumns = "organ_id";
+
+    /**
+     * 即使命中租户列也排除的表，逗号分隔。
+     */
+    @Setter
+    private String excludeTables = "";
 
     /**
      * 构造 Foundry 配置对象。
@@ -349,5 +369,69 @@ public class FoundryConfig extends GeneratorConfig {
      */
     public String getAuthor() {
         return "G2rain Generator";
+    }
+
+    /**
+     * 解析租户列集合，保持配置顺序。
+     */
+    public java.util.Set<String> getTenantColumnSet() {
+        return new java.util.LinkedHashSet<>(parseCsv(tenantColumns));
+    }
+
+    /**
+     * 解析租户列列表，保持配置顺序。
+     */
+    public java.util.List<String> getTenantColumnNames() {
+        return parseCsv(tenantColumns);
+    }
+
+    /**
+     * 解析排除表集合。
+     */
+    public java.util.Set<String> getExcludeTableSet() {
+        java.util.Set<String> excluded = new java.util.LinkedHashSet<>();
+        for (String tableName : parseCsv(excludeTables)) {
+            excluded.add(tableName.toLowerCase(java.util.Locale.ROOT));
+        }
+        return excluded;
+    }
+
+    /**
+     * 判断当前表是否生成数据隔离相关代码。
+     */
+    public boolean isIsolationEnabledFor(TableInfo table) {
+        if (!withIsolation || table == null || Strings.isBlank(table.getTableName())) {
+            return false;
+        }
+        if (getExcludeTableSet().contains(table.getTableName().toLowerCase(java.util.Locale.ROOT))) {
+            return false;
+        }
+        return getTenantColumn(table) != null;
+    }
+
+    /**
+     * 按 tenantColumns 顺序返回第一个命中的租户列。
+     */
+    public ColumnInfo getTenantColumn(TableInfo table) {
+        if (table == null) {
+            return null;
+        }
+        for (String tenantColumnName : getTenantColumnNames()) {
+            ColumnInfo column = table.getColumn(tenantColumnName);
+            if (column != null) {
+                return column;
+            }
+        }
+        return null;
+    }
+
+    private java.util.List<String> parseCsv(String raw) {
+        if (Strings.isBlank(raw)) {
+            return java.util.List.of();
+        }
+        return java.util.Arrays.stream(raw.split(","))
+            .map(String::trim)
+            .filter(value -> !value.isEmpty())
+            .toList();
     }
 }

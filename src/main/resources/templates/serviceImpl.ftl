@@ -8,6 +8,7 @@ import com.g2rain.common.model.PageData;
 import com.g2rain.common.model.PageSelectListDto;
 import com.g2rain.common.utils.Asserts;
 import com.g2rain.common.utils.Moments;
+import com.g2rain.common.validation.Validations;
 import ${config.getConverterPackage()}.${table.entityName}Converter;
 import ${config.getDaoPackage()}.${table.entityName}Dao;
 import ${config.getPoPackage()}.${table.entityName}Po;
@@ -72,6 +73,8 @@ public class ${table.entityName}ServiceImpl implements ${table.entityName}Servic
 
     @Override
     public ${table.primaryKey.javaType} save(${table.entityName}Dto dto) {
+        Validations.validateSave(dto);
+
         // 转换DTO为PO
         ${table.entityName}Po entity = ${table.entityName}Converter.INSTANCE.dto2po(dto);
 
@@ -88,6 +91,8 @@ public class ${table.entityName}ServiceImpl implements ${table.entityName}Servic
             int success = ${table.entityNameLower}Dao.insert(entity);
             Asserts.greaterThan(success, 0, SystemErrorCode.CREATE_DATA_ERROR);
         } else {
+            ${table.entityName}Po existing = ${table.entityNameLower}Dao.selectById(id);
+            Asserts.isTrue(Objects.nonNull(existing), SystemErrorCode.DATA_NOT_EXISTS, id);
             // 更新：直接更新
             entity.setUpdateTime(Moments.now());
             int success = ${table.entityNameLower}Dao.update(entity);
@@ -99,6 +104,8 @@ public class ${table.entityName}ServiceImpl implements ${table.entityName}Servic
 
     @Override
     public int delete(${table.primaryKey.javaType} id) {
+        ${table.entityName}Po existing = ${table.entityNameLower}Dao.selectById(id);
+        Asserts.isTrue(Objects.nonNull(existing), SystemErrorCode.DATA_NOT_EXISTS, id);
         return ${table.entityNameLower}Dao.delete(id);
     }
 }

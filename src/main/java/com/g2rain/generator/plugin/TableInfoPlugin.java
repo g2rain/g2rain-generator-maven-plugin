@@ -176,6 +176,8 @@ public class TableInfoPlugin extends PluginAdapter {
         }
 
         columnInfo.setAutoIncrement(column.isAutoIncrement());
+        columnInfo.setNullable(column.isNullable());
+        columnInfo.setLength(column.getLength());
         return columnInfo;
     }
 

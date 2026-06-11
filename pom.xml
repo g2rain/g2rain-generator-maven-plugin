@@ -6,7 +6,7 @@
 
     <groupId>com.g2rain</groupId>
     <artifactId>g2rain-generator-maven-plugin</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <packaging>maven-plugin</packaging>
 
     <name>G2rain Java Code Generator Maven Plugin</name>

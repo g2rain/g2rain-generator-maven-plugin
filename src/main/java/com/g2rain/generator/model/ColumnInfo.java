@@ -75,6 +75,16 @@ public class ColumnInfo {
      */
     private boolean autoIncrement;
 
+    /**
+     * 是否允许 NULL（来自 JDBC 元数据）
+     */
+    private boolean nullable = true;
+
+    /**
+     * 字符类型列长度；0 表示未知或无长度限制
+     */
+    private int length;
+
     public boolean isPrivateKey() {
         return primaryKey || ColumnUtils.isPrivateKeyColumn(columnName);
     }
