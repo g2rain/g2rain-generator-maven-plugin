@@ -298,8 +298,14 @@ public class FoundryGenerator extends AbstractGenerator {
             return;
         }
 
+        generateSharedTemplates();
+
         for (TableInfo t : tableInfoList) {
             for (TemplatePaths p : TemplatePaths.values()) {
+                if (p.isSharedTemplate()) {
+                    continue;
+                }
+
                 Path outputFile = p.getOutputPath(foundryConfig, t.getEntityName());
                 // 文件存在且非空 且 (skipIfExists 为 true 或者 overwrite 为 false) 则跳过
                 if (Files.exists(outputFile) && Files.size(outputFile) > 0 && (p.isSkipIfExists() || !foundryConfig.isOverwrite())) {
@@ -311,6 +317,26 @@ public class FoundryGenerator extends AbstractGenerator {
             }
 
             log.info("tableInfo:" + t.toString());
+        }
+    }
+
+    /**
+     * 生成项目级共享模板（application*.yml），仅执行一次。
+     */
+    private void generateSharedTemplates() throws Exception {
+        Map<String, Object> model = Map.of("config", foundryConfig);
+        for (TemplatePaths sharedTemplate : TemplatePaths.values()) {
+            if (!sharedTemplate.isSharedTemplate()) {
+                continue;
+            }
+
+            Path outputFile = sharedTemplate.getOutputPath(foundryConfig, "");
+            if (Files.exists(outputFile) && Files.size(outputFile) > 0
+                && (sharedTemplate.isSkipIfExists() || !foundryConfig.isOverwrite())) {
+                continue;
+            }
+
+            processTemplate(sharedTemplate.getTemplateName(), outputFile, model);
         }
     }
 }

@@ -1,0 +1,18 @@
+database.url=jdbc:mysql://localhost:3306/my_database?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+database.driver=com.mysql.cj.jdbc.Driver
+database.username=root
+database.password=your_password
+
+project.basePackage=com.example.demo
+
+database.tables=user,order_info
+tables.overwrite=false
+
+# 是否为租户表生成隔离代码，默认 true
+data.isolation.withIsolation=true
+
+# 租户列识别，逗号分隔，默认 organ_id
+data.isolation.tenantColumns=organ_id
+
+# 即使命中租户列也排除的表，逗号分隔
+data.isolation.excludeTables=

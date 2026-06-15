@@ -93,6 +93,27 @@ public class G2rainGenerateMojo extends AbstractMojo {
     private File configFile;
 
     /**
+     * 是否为租户表生成数据隔离相关代码。
+     */
+    @Setter
+    @Parameter(property = "data.isolation.withIsolation")
+    private Boolean withIsolation;
+
+    /**
+     * 租户列识别，逗号分隔。
+     */
+    @Setter
+    @Parameter(property = "data.isolation.tenantColumns")
+    private String tenantColumns;
+
+    /**
+     * 即使命中租户列也排除的表，逗号分隔。
+     */
+    @Setter
+    @Parameter(property = "data.isolation.excludeTables")
+    private String excludeTables;
+
+    /**
      * 控制台输入扫描器，用于交互式参数输入
      */
     private Scanner scanner;
@@ -137,6 +158,9 @@ public class G2rainGenerateMojo extends AbstractMojo {
             getLog().info(String.format(Constants.LOG_FORMAT, "Database User", username));
             getLog().info(String.format(Constants.LOG_FORMAT, "Table Names", tables));
             getLog().info(String.format(Constants.LOG_FORMAT, "Overwrite Files", Boolean.TRUE.equals(this.overwrite)));
+            getLog().info(String.format(Constants.LOG_FORMAT, "Isolation Codegen", resolveWithIsolation()));
+            getLog().info(String.format(Constants.LOG_FORMAT, "Tenant Columns", resolveTenantColumns()));
+            getLog().info(String.format(Constants.LOG_FORMAT, "Exclude Tables", Strings.isBlank(excludeTables) ? "" : excludeTables));
             getLog().info(Constants.HORIZONTAL_LINE);
             getLog().info("");
 
@@ -153,6 +177,9 @@ public class G2rainGenerateMojo extends AbstractMojo {
             config.setStepIn(Boolean.TRUE);
             config.setTables(this.tables);
             config.setOverwrite(Boolean.TRUE.equals(this.getOverwrite()));
+            config.setWithIsolation(resolveWithIsolation());
+            config.setTenantColumns(resolveTenantColumns());
+            config.setExcludeTables(resolveExcludeTables());
             new FoundryGenerator(getLog(), config).generate();
             getLog().info(">>> Code Generation Completed.");
         } catch (Exception e) {
@@ -251,6 +278,21 @@ public class G2rainGenerateMojo extends AbstractMojo {
             if (Objects.isNull(this.overwrite)) {
                 String ow = props.getProperty("tables.overwrite");
                 this.overwrite = "true".equalsIgnoreCase(ow);
+            }
+
+            if (Objects.isNull(this.withIsolation)) {
+                String isolation = props.getProperty("data.isolation.withIsolation");
+                if (Strings.isNotBlank(isolation)) {
+                    this.withIsolation = "true".equalsIgnoreCase(isolation.trim());
+                }
+            }
+
+            if (Strings.isBlank(this.tenantColumns)) {
+                this.tenantColumns = props.getProperty("data.isolation.tenantColumns");
+            }
+
+            if (Strings.isBlank(this.excludeTables)) {
+                this.excludeTables = props.getProperty("data.isolation.excludeTables");
             }
 
             return true;
@@ -445,5 +487,17 @@ public class G2rainGenerateMojo extends AbstractMojo {
                 }
             }
         }
+    }
+
+    private boolean resolveWithIsolation() {
+        return !Boolean.FALSE.equals(withIsolation);
+    }
+
+    private String resolveTenantColumns() {
+        return Strings.isBlank(tenantColumns) ? "organ_id" : tenantColumns.trim();
+    }
+
+    private String resolveExcludeTables() {
+        return Strings.isBlank(excludeTables) ? "" : excludeTables.trim();
     }
 }

@@ -3,6 +3,7 @@ package com.g2rain.generator;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import com.g2rain.generator.utils.ValidationRuleHelper;
 import org.apache.maven.plugin.logging.Log;
 
 import java.io.Writer;
@@ -68,6 +69,11 @@ public abstract class AbstractGenerator {
         this.configuration = new Configuration(Configuration.VERSION_2_3_31);
         this.configuration.setClassForTemplateLoading(getClass(), basePackage);
         this.configuration.setDefaultEncoding(StandardCharsets.UTF_8.name());
+        try {
+            this.configuration.setSharedVariable("validation", ValidationRuleHelper.INSTANCE);
+        } catch (freemarker.template.TemplateModelException e) {
+            throw new IllegalStateException("Failed to register validation helper for templates", e);
+        }
     }
 
     /**

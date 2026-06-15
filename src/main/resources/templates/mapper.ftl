@@ -312,4 +312,142 @@
         </where>
         <include refid="dynamicOrderBy"/>
     </select>
+
+<#if config.isIsolationEnabledFor(table)>
+    <!-- 插入单条记录（忽略数据隔离） -->
+    <insert id="insertWithoutIsolation" parameterType="${config.getPoPackage()}.${table.entityName}Po">
+        INSERT INTO ${table.tableName} (
+        <#if !table.primaryKey.autoIncrement>
+        ${table.primaryKey.columnName}<#if (table.baseColumns?size > 0 || table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
+        </#if>
+        ${table.baseColumns?map(column -> column.columnName)?join(", ")}<#if (table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
+        ${table.columns?map(column -> column.columnName)?join(", ")}<#if (table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
+        <#if table.deleteFlagColumn??>
+        ${table.deleteFlagColumn.columnName}<#if table.versionColumn??>,</#if>
+        </#if>
+        <#if table.versionColumn??>
+        ${table.versionColumn.columnName}
+        </#if>
+        ) VALUES (
+        <#if !table.primaryKey.autoIncrement>
+        <#noparse>#{</#noparse>${table.primaryKey.propertyName}, jdbcType=${table.primaryKey.columnType}<#noparse>}</#noparse><#if (table.baseColumns?size > 0 || table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
+        </#if>
+        ${table.baseColumns?map(column -> "#{"+column.propertyName+", jdbcType="+column.columnType+"}")?join(", ")}<#if (table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
+        ${table.columns?map(column -> "#{"+column.propertyName+", jdbcType="+column.columnType+"}")?join(", ")}<#if (table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
+        <#if table.deleteFlagColumn??>
+        0<#if table.versionColumn??>,</#if>
+        </#if>
+        <#if table.versionColumn??>
+        0
+        </#if>
+        )
+    </insert>
+
+    <!-- 根据ID更新记录（忽略数据隔离） -->
+    <update id="updateWithoutIsolation" parameterType="${config.getPoPackage()}.${table.entityName}Po">
+        UPDATE ${table.tableName}
+        <set>
+            <#list table.baseColumns as column>
+            <#if column.supportUpdate>
+            <if test="${column.propertyName} != null">
+                ${column.columnName} = <#noparse>#{</#noparse>${column.propertyName}, jdbcType=${column.columnType}<#noparse>}</#noparse>,
+            </if>
+            </#if>
+            </#list>
+            <#list table.columns as column>
+            <if test="${column.propertyName} != null">
+                ${column.columnName} = <#noparse>#{</#noparse>${column.propertyName}, jdbcType=${column.columnType}<#noparse>}</#noparse>,
+            </if>
+            </#list>
+            <#if table.versionColumn??>
+            ${table.versionColumn.columnName} = ${table.versionColumn.columnName} + 1
+            </#if>
+        </set>
+        WHERE ${table.primaryKey.columnName} = <#noparse>#{</#noparse>${table.primaryKey.propertyName}, jdbcType=${table.primaryKey.columnType}<#noparse>}</#noparse>
+    </update>
+
+    <!-- 根据ID查询记录（忽略数据隔离） -->
+    <select id="selectByIdWithoutIsolation" parameterType="${table.primaryKey.javaType}" resultMap="BaseResultMap">
+        SELECT
+        ${table.primaryKey.columnName}<#if (table.baseColumns?size > 0 || table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
+        ${table.baseColumns?map(column -> column.columnName)?join(", ")}<#if (table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
+        ${table.columns?map(column -> column.columnName)?join(", ")}<#if (table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
+        <#if table.deleteFlagColumn??>
+        ${table.deleteFlagColumn.columnName}<#if table.versionColumn??>,</#if>
+        </#if>
+        <#if table.versionColumn??>
+        ${table.versionColumn.columnName}
+        </#if>
+        FROM ${table.tableName}
+        WHERE ${table.primaryKey.columnName} = <#noparse>#{</#noparse>id, jdbcType=${table.primaryKey.columnType}<#noparse>}</#noparse>
+        <#if table.deleteFlagColumn??>
+        AND (${table.deleteFlagColumn.columnName} = 0 OR ${table.deleteFlagColumn.columnName} IS NULL)
+        </#if>
+    </select>
+
+    <!-- 根据SelectDto条件查询列表（忽略数据隔离） -->
+    <select id="selectListWithoutIsolation" parameterType="${config.getBasePackage()}.dto.${table.entityName}SelectDto" resultMap="BaseResultMap">
+        SELECT
+        ${table.primaryKey.columnName}<#if (table.baseColumns?size > 0 || table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
+        ${table.baseColumns?map(column -> column.columnName)?join(", ")}<#if (table.columns?size > 0 || table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
+        ${table.columns?map(column -> column.columnName)?join(", ")}<#if (table.deleteFlagColumn?? || table.versionColumn??)>,</#if>
+        <#if table.deleteFlagColumn??>
+        ${table.deleteFlagColumn.columnName}<#if table.versionColumn??>,</#if>
+        </#if>
+        <#if table.versionColumn??>
+        ${table.versionColumn.columnName}
+        </#if>
+        FROM ${table.tableName}
+        <where>
+            <if test="id != null">
+                AND ${table.primaryKey.columnName} = <#noparse>#{</#noparse>id, jdbcType=${table.primaryKey.columnType}<#noparse>}</#noparse>
+            </if>
+            <if test="ids != null and ids.size() > 0">
+                AND ${table.primaryKey.columnName} IN
+                <foreach collection="ids" item="item" open="(" separator="," close=")">
+                    <#noparse>#{</#noparse>item, jdbcType=${table.primaryKey.columnType}<#noparse>}</#noparse>
+                </foreach>
+            </if>
+            <#list table.baseColumns as column>
+            <#if column.propertyName == "createTime">
+            <if test="${column.propertyName} != null">
+                <if test="${column.propertyName}[0] != '' and (${column.propertyName}.size() lt 2 or ${column.propertyName}[1] == '')">
+                    AND ${column.columnName} >= <#noparse>#{</#noparse>${column.propertyName}[0], jdbcType=TIMESTAMP<#noparse>}</#noparse>
+                </if>
+                <if test="${column.propertyName}.size() >= 2 and ${column.propertyName}[0] == '' and ${column.propertyName}[1] != ''">
+                    AND ${column.columnName} &lt;= <#noparse>#{</#noparse>${column.propertyName}[1], jdbcType=TIMESTAMP<#noparse>}</#noparse>
+                </if>
+                <if test="${column.propertyName}.size() >= 2 and ${column.propertyName}[0] != '' and ${column.propertyName}[1] != ''">
+                    AND ${column.columnName} BETWEEN <#noparse>#{</#noparse>${column.propertyName}[0], jdbcType=TIMESTAMP<#noparse>}</#noparse>
+                    AND <#noparse>#{</#noparse>${column.propertyName}[1], jdbcType=TIMESTAMP<#noparse>}</#noparse>
+                </if>
+            </if>
+            </#if>
+            <#if column.propertyName == "updateTime">
+            <if test="${column.propertyName} != null">
+                <if test="${column.propertyName}[0] != '' and (${column.propertyName}.size() lt 2 or ${column.propertyName}[1] == '')">
+                    AND ${column.columnName} >= <#noparse>#{</#noparse>${column.propertyName}[0], jdbcType=TIMESTAMP<#noparse>}</#noparse>
+                </if>
+                <if test="${column.propertyName}.size() >= 2 and ${column.propertyName}[0] == '' and ${column.propertyName}[1] != ''">
+                    AND ${column.columnName} &lt;= <#noparse>#{</#noparse>${column.propertyName}[1], jdbcType=TIMESTAMP<#noparse>}</#noparse>
+                </if>
+                <if test="${column.propertyName}.size() >= 2 and ${column.propertyName}[0] != '' and ${column.propertyName}[1] != ''">
+                    AND ${column.columnName} BETWEEN <#noparse>#{</#noparse>${column.propertyName}[0], jdbcType=TIMESTAMP<#noparse>}</#noparse>
+                    AND <#noparse>#{</#noparse>${column.propertyName}[1], jdbcType=TIMESTAMP<#noparse>}</#noparse>
+                </if>
+            </if>
+            </#if>
+            </#list>
+            <#list table.columns as column>
+            <if test="${column.propertyName} != null">
+                AND ${column.columnName} = <#noparse>#{</#noparse>${column.propertyName}, jdbcType=${column.columnType}<#noparse>}</#noparse>
+            </if>
+            </#list>
+            <#if table.deleteFlagColumn??>
+            AND (${table.deleteFlagColumn.columnName} = 0 OR ${table.deleteFlagColumn.columnName} IS NULL)
+            </#if>
+        </where>
+        <include refid="dynamicOrderBy"/>
+    </select>
+</#if>
 </mapper>

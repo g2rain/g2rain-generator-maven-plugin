@@ -1,9 +1,9 @@
 ## G2rain Generator Maven Plugin
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.g2rain/g2rain-generator-maven-plugin.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/com.g2rain/g2rain-generator-maven-plugin)
-[![Build](https://github.com/g2rain/g2rain-generator-maven-plugin/actions/workflows/release.yml/badge.svg)](https://github.com/g2rain/g2rain-generator-maven-plugin/actions/workflows/release.yml)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Java](https://img.shields.io/badge/Java-21+-orange.svg)](https://adoptium.net/)
+[![Maven Central](https://img.shields.io/maven-central/v/com.g2rain/g2rain-generator-maven-plugin.svg)](https://search.maven.org/artifact/com.g2rain/g2rain-generator-maven-plugin)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Java Version](https://img.shields.io/badge/Java-25+-orange.svg)](https://openjdk.java.net/)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/g2rain/g2rain-generator-maven-plugin/release.yml?branch=main)](https://github.com/g2rain/g2rain-generator-maven-plugin/actions/workflows/release.yml)
 
 一个基于 **MyBatis Generator** 和 **FreeMarker** 的 Java 代码生成 Maven 插件，可根据数据库表结构，一键生成包含 **API / DTO / VO / Service / Controller / DAO / PO / Mapper XML** 在内的完整 CRUD 代码，主要面向 Spring Boot/RESTful 风格项目。我们在跨项目协作上倡导“读写分离”社区实践：**默认只输出查询类接口**，写请求（新增/更新/删除）建议由业务方通过消息、事件或其他服务独立实现，以降低项目之间的耦合和副作用。
 
@@ -17,7 +17,7 @@
         <plugin>
             <groupId>com.g2rain</groupId>
             <artifactId>g2rain-generator-maven-plugin</artifactId>
-            <version>1.0.4</version>
+            <version>1.0.6</version>
         </plugin>
     </plugins>
 </build>
@@ -74,7 +74,7 @@ demo-project/
         <plugin>
             <groupId>com.g2rain</groupId>
             <artifactId>g2rain-generator-maven-plugin</artifactId>
-            <version>1.0.5</version>
+            <version>1.0.6</version>
         </plugin>
     </plugins>
 </build>
@@ -125,13 +125,13 @@ tables.overwrite=false
 
 ```bash
 # 使用默认配置文件名 codegen.properties
-mvn com.g2rain:g2rain-generator-maven-plugin:1.0.5:generate 
+mvn com.g2rain:g2rain-generator-maven-plugin:1.0.6:generate 
 
 # 使用默认配置文件名 codegen.properties，生成指定的表的接口
-mvn com.g2rain:g2rain-generator-maven-plugin:1.0.5:generate -Ddatabase.tables=表名
+mvn com.g2rain:g2rain-generator-maven-plugin:1.0.6:generate -Ddatabase.tables=表名
 
 # 或者使用自定义配置文件路径
-mvn com.g2rain:g2rain-generator-maven-plugin:1.0.5:generate \
+mvn com.g2rain:g2rain-generator-maven-plugin:1.0.6:generate \
   -Dconfig.file=/path/to/your-codegen.properties
 ```
 
@@ -140,7 +140,7 @@ mvn com.g2rain:g2rain-generator-maven-plugin:1.0.5:generate \
 所有关键参数都可以通过命令行传入（优先级高于配置文件）：
 
 ```bash
-mvn com.g2rain:g2rain-generator-maven-plugin:1.0.5:generate \
+mvn com.g2rain:g2rain-generator-maven-plugin:1.0.6:generate \
   -Dproject.basePackage=com.example.demo \
   -Ddatabase.url=jdbc:mysql://localhost:3306/test?useSSL=false&serverTimezone=UTC \
   -Ddatabase.driver=com.mysql.cj.jdbc.Driver \
@@ -175,8 +175,17 @@ mvn com.g2rain:g2rain-generator-maven-plugin:1.0.5:generate \
 | `database.password`      | 数据库密码（可选）           | `your_password`                                              |
 | `database.tables`        | 要生成代码的表名（必填）     | `user,order_info,product`                                    |
 | `tables.overwrite`       | 是否覆盖已有文件（可选）     | `true` / `false`                                             |
+| `data.isolation.withIsolation` | 是否为租户表生成隔离代码（可选，默认 true） | `true` / `false` |
+| `data.isolation.tenantColumns` | 租户列识别，逗号分隔（可选，默认 `organ_id`） | `organ_id` / `tenant_id,organ_id` |
+| `data.isolation.excludeTables` | 排除表，逗号分隔（可选） | `dict_type,config` |
 
 > 注意：`database.password` 可以为空，部分数据库支持无密码访问；`tables.overwrite` 未配置时默认 **false**。
+
+### 数据隔离 codegen 与运行时开关
+
+代码生成使用 `data.isolation.*` 配置，**不要**使用 `data.isolation.enabled` 作为 codegen 开关（避免与运行时 `g2rain.data.isolation.enabled` 混淆）。
+
+命中隔离条件时固定生成四个方法：`insertWithoutIsolation`、`updateWithoutIsolation`、`selectByIdWithoutIsolation`、`selectListWithoutIsolation`。运行时是否在 SQL 中注入租户条件由 `application.yml` 的 `g2rain.data.isolation.enabled` 控制。
 
 ### Maven 命令行参数（与配置文件键一一对应）
 
@@ -189,6 +198,9 @@ mvn com.g2rain:g2rain-generator-maven-plugin:1.0.5:generate \
 | `-Ddatabase.password`    | 数据库密码                   | `database.password`       |
 | `-Ddatabase.tables`      | 要生成代码的表名             | `database.tables`         |
 | `-Dtables.overwrite`     | 是否覆盖已有文件             | `tables.overwrite`        |
+| `-Ddata.isolation.withIsolation` | 是否生成隔离代码     | `data.isolation.withIsolation` |
+| `-Ddata.isolation.tenantColumns` | 租户列识别           | `data.isolation.tenantColumns` |
+| `-Ddata.isolation.excludeTables` | 排除表               | `data.isolation.excludeTables` |
 | `-Dconfig.file`          | 配置文件路径                 | `codegen.properties` 文件 |
 
 参数优先级：**命令行参数 > 配置文件 > 交互式输入**。
@@ -266,7 +278,7 @@ mvn com.g2rain:g2rain-generator-maven-plugin:1.0.5:generate \
 
 ### 环境要求
 
-- **JDK**：21+
+- **JDK**：25+
 - **Maven**：3.6+
 - **数据库**：MySQL 8.0+（或其他支持的 JDBC 数据库）
 
@@ -332,7 +344,7 @@ database.tables=user,order_info,product
 或：
 
 ```bash
-mvn com.g2rain:g2rain-generator-maven-plugin:1.0.5:generate \
+mvn com.g2rain:g2rain-generator-maven-plugin:1.0.6:generate \
   -Dproject.basePackage=com.example.demo \
   -Ddatabase.url=... \
   -Ddatabase.driver=com.mysql.cj.jdbc.Driver \
@@ -367,6 +379,7 @@ mvn com.g2rain:g2rain-generator-maven-plugin:1.0.5:generate \
 - **v1.0.1**：修订版本，修复Mybatis Mapper时间条件查询BUG
 - **v1.0.4**：修订版本，升级依赖的组件版本
 - **v1.0.5**：修订版本，新增 Spring Doc 注解
+- **v1.0.6**：升级 JDK 25；对齐 g2rain-cms 脚手架；新增数据隔离 codegen（`@DataIsolation` + 4×WithoutIsolation）；共享 YAML 模板（含 application-nacos.yml）
 
 ## 🤝 贡献指南
 
