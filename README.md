@@ -47,8 +47,6 @@ g2rain 后端代码生成与 Maven 插件，面向后端工程提供代码生成
 
 该仓库位于 g2rain 后端研发支撑层，为多个后端项目提供集成能力、工程化工具或共享扩展。
 
-本项目已在中央架构库登记为 `backend-code-generation-maven-plugin` 类型的平台唯一工具，是 G2rain 官方后端数据库代码生成引擎；它既提供独立 `generate` Goal，也是 `g2rain-crafter` foundry 阶段的底层实现。项目事实见 [docs/project.yaml](docs/project.yaml)，完整文档入口见 [docs/index.md](docs/index.md)。
-
 ## 业务域说明
 
 该仓库聚焦于 `后端代码生成、Maven 插件与工程化自动化`。
@@ -179,15 +177,6 @@ flowchart TD
 
 本项目基于 [Apache 2.0许可证](https://github.com/g2rain/g2rain-common/blob/main/LICENSE) 开源。
 
-## 工程文档
-
-- [文档导航](docs/index.md)
-- [项目元数据](docs/project.yaml)
-- [生成契约](docs/architecture/generation-contract.md)
-- [架构偏差](docs/architecture/deviations.md)
-- [安全边界](docs/security/security-boundaries.md)
-- [需求入口](docs/requirements/README.md)
-
 ## 联系我们
 
 - Issues: [GitHub Issues](https://github.com/g2rain/g2rain/issues)
@@ -197,4 +186,3 @@ flowchart TD
 ## 致谢
 
 感谢所有为 g2rain 项目提交 Issue、代码、文档、建议和使用反馈的开发者们！
-
