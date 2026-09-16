@@ -24,7 +24,7 @@ public interface ${table.entityName}Api {
     /**
      * 根据条件查询列表
      *
-     * @param selectDto 查询条件DTO
+     * @param selectDto 查询条件 DTO
      * @return 数据列表
      */
     @GetMapping("/list")
