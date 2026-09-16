@@ -104,21 +104,21 @@ flowchart TD
 | 构建组件 | `mvn clean package` | 执行 Maven 构建，生成可发布或可本地安装的组件产物。 |
 | 本地安装 | `mvn clean install` | 安装到本地 Maven 仓库，便于业务工程试用插件目标。 |
 
-版本号以项目构建配置为准，当前识别为 `1.0.6`。
+版本号以项目构建配置为准，当前识别为 `1.0.7`。
 
 ## 构建与镜像
 
 | 目标 | 命令 | 产物 | 说明 |
 | --- | --- | --- | --- |
-| 组件产物 | `mvn clean package` | `g2rain-generator-maven-plugin-1.0.6.jar` | 执行 Maven 标准构建，生成可发布的 Maven 插件产物。 |
+| 组件产物 | `mvn clean package` | `g2rain-generator-maven-plugin-1.0.7.jar` | 执行 Maven 标准构建，生成可发布的 Maven 插件产物。 |
 | 本地 Maven 安装 | `mvn clean install` | `本地 Maven 仓库产物` | 安装到本地 Maven 仓库，便于业务工程本地验证插件目标。 |
 
 ## 插件使用
 
 | 目标 | 方式 | 命令 | 说明 |
 | --- | --- | --- | --- |
-| Maven 插件配置 | Maven | `<plugin><groupId>com.g2rain</groupId><artifactId>g2rain-generator-maven-plugin</artifactId><version>1.0.6</version></plugin>` | 在业务工程 pom.xml 的 plugins 中配置该 Maven 插件。 |
-| 执行插件目标 | Maven Goal | `mvn com.g2rain:g2rain-generator-maven-plugin:1.0.6:generate` | 在业务工程中执行插件目标，触发代码生成或工程处理逻辑。 |
+| Maven 插件配置 | Maven | `<plugin><groupId>com.g2rain</groupId><artifactId>g2rain-generator-maven-plugin</artifactId><version>1.0.7</version></plugin>` | 在业务工程 pom.xml 的 plugins 中配置该 Maven 插件。 |
+| 执行插件目标 | Maven Goal | `mvn com.g2rain:g2rain-generator-maven-plugin:1.0.7:generate` | 在业务工程中执行插件目标，触发代码生成或工程处理逻辑。 |
 
 ## 安全说明
 

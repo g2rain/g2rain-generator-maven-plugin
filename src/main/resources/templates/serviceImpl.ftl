@@ -54,9 +54,9 @@ public class ${table.entityName}ServiceImpl implements ${table.entityName}Servic
     @Override
     public List<${table.entityName}Vo> selectList(${table.entityName}SelectDto selectDto) {
         return ${table.entityNameLower}Dao.selectList(selectDto)
-                .stream()
-                .map(${table.entityName}Converter.INSTANCE::po2vo)
-                .toList();
+            .stream()
+            .map(${table.entityName}Converter.INSTANCE::po2vo)
+            .toList();
     }
 
     @Override
@@ -65,9 +65,9 @@ public class ${table.entityName}ServiceImpl implements ${table.entityName}Servic
             ${table.entityNameLower}Dao.selectList(selectDto.getQuery());
         });
         List<${table.entityName}Vo> result = page.getResult()
-                .stream()
-                .map(${table.entityName}Converter.INSTANCE::po2vo)
-                .toList();
+            .stream()
+            .map(${table.entityName}Converter.INSTANCE::po2vo)
+            .toList();
         return PageData.of(page.getPageNum(), page.getPageSize(), page.getTotal(), result);
     }
 
@@ -75,7 +75,7 @@ public class ${table.entityName}ServiceImpl implements ${table.entityName}Servic
     public ${table.primaryKey.javaType} save(${table.entityName}Dto dto) {
         Validations.validateSave(dto);
 
-        // 转换DTO为PO
+        // 转换 DTO 为 PO
         ${table.entityName}Po entity = ${table.entityName}Converter.INSTANCE.dto2po(dto);
 
         // 判断是新增还是更新

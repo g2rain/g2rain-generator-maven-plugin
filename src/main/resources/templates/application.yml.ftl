@@ -25,25 +25,17 @@ mybatis:
     jdbc-type-for-null: NULL
 
 g2rain:
-  web:
-    context-path: /<#if config.getProjectName()??>${config.getProjectName()}<#else>g2rain-demo</#if>
-    cors:
-      enabled: true
-  data:
-    isolation:
-      enabled: true
-
-springdoc:
-  api-docs:
-    enabled: true
-  swagger-ui:
-    enabled: true
+  springdoc:
+    description: $<#noparse>{spring.application.name}</#noparse>接口文档
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include:
+          - health
+          - info
+          - metrics
   endpoint:
     health:
       show-details: when_authorized
