@@ -41,7 +41,7 @@ public interface ${table.entityName}Dao {
     int insertMultiple(List<${table.entityName}Po> list);
 
     /**
-     * 根据ID更新记录
+     * 根据 ID 更新记录
      *
      * @param entity 实体对象
      * @return 影响行数
@@ -49,9 +49,9 @@ public interface ${table.entityName}Dao {
     int update(${table.entityName}Po entity);
 
     /**
-     * 根据ID删除记录
+     * 根据 ID 删除记录
      *
-     * @param id 主键ID
+     * @param id 主键 ID
      * @return 影响行数
      */
     int delete(${table.primaryKey.javaType} id);
@@ -67,17 +67,17 @@ public interface ${table.entityName}Dao {
     </#if>
 
     /**
-     * 根据ID查询记录
+     * 根据 ID 查询记录
      *
-     * @param id 主键ID
+     * @param id 主键 ID
      * @return 实体对象
      */
     ${table.entityName}Po selectById(${table.primaryKey.javaType} id);
 
     /**
-     * 根据查询入参DTO筛选列表
+     * 根据查询入参 DTO 筛选列表
      *
-     * @param selectDto 查询条件DTO
+     * @param selectDto 查询条件 DTO
      * @return 实体对象列表
      */
     List<${table.entityName}Po> selectList(${table.entityName}SelectDto selectDto);
@@ -104,7 +104,7 @@ public interface ${table.entityName}Dao {
     /**
      * 根据ID查询记录（忽略数据隔离）
      *
-     * @param id 主键ID
+     * @param id 主键 ID
      * @return 实体对象
      */
     @IgnoreIsolation
@@ -113,7 +113,7 @@ public interface ${table.entityName}Dao {
     /**
      * 根据查询入参DTO筛选列表（忽略数据隔离）
      *
-     * @param selectDto 查询条件DTO
+     * @param selectDto 查询条件 DTO
      * @return 实体对象列表
      */
     @IgnoreIsolation

@@ -25,4 +25,4 @@ spring:
         max-retry: 3                                                    # 最大重试次数
         timeout: 5000                                                   # 获取配置的超时时间（毫秒）
   config:
-    import: optional:nacos:$<#noparse>{spring.application.name}</#noparse>.yaml?group=$<#noparse>{spring.application.name}</#noparse>
+    import: optional:nacos:$<#noparse>{spring.application.name}</#noparse>.yml?group=$<#noparse>{spring.application.name}</#noparse>
