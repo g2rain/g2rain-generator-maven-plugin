@@ -97,7 +97,7 @@ public class ${table.entityName}Dto extends BaseDto {
     <#if sizeAnn?has_content>
     ${sizeAnn}
     </#if>
-    @Schema(description = "${validation.schemaDescription(column)}"<#if validation.schemaMaxLength(column) gt 0>, maxLength = ${validation.schemaMaxLength(column)}</#if>)
+    @Schema(description = "${validation.schemaDescription(column)}"<#if validation.schemaMaxLength(column) gt 0>, maxLength = ${validation.schemaMaxLength(column)?c}</#if>)
     private ${column.javaType} ${column.propertyName};
     </#if>
     </#if>

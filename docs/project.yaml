@@ -1,0 +1,84 @@
+schemaVersion: 1
+name: g2rain-generator-maven-plugin
+repository: g2rain/g2rain-generator-maven-plugin
+family: platform-tool
+architectureType: backend-code-generation-maven-plugin
+role: G2rain 官方后端数据库代码生成引擎
+version: 1.0.6
+license: Apache-2.0
+
+centralRegistration:
+  repository: https://github.com/g2rain/g2rain
+  ref: a3eef39
+  document: docs/architecture/platform-tools/g2rain-generator-maven-plugin.md
+  status: registered
+  implementationPolicy: organization-singleton
+  relatedProfile: java-domain-service
+  relatedProfileVersion: 1.0.0
+
+toolchain:
+  java: "25"
+  build: Maven
+  packaging: maven-plugin
+  goalPrefix: g2rain
+  goal: generate
+  templates: FreeMarker 2.3.34
+  metadata: MyBatis Generator 1.4.2
+  databaseDriver: MySQL Connector 9.6.0
+
+ownership:
+  owns:
+    - generate Goal、参数与配置优先级
+    - JDBC 表元数据解析和 TableInfo 模型
+    - PO、Mapper、API、DTO、VO、DAO、Service、Controller 和配置模板
+    - 类型、校验、逻辑删除和数据隔离生成规则
+    - 输出路径、skipIfExists 和 overwrite 保护
+  excludes:
+    - Crafter 的项目骨架、交互入口和阶段编排
+    - 生成项目的领域需求、手工扩展和生产运行
+
+generation:
+  input:
+    - project.basePackage
+    - database.url
+    - database.driver
+    - database.username
+    - database.password
+    - database.tables
+    - tables.overwrite
+    - data.isolation.*
+  configPrecedence: explicit Maven properties over codegen.properties over interactive input
+  overwriteDefault: false
+  targetProfile: java-domain-service 1.0.0
+  usedBy: g2rain-crafter 1.0.7
+
+commands:
+  verify: mvn test
+  package: mvn clean package
+  install: mvn clean install
+  help: mvn com.g2rain:g2rain-generator-maven-plugin:1.0.6:help
+  generate: mvn com.g2rain:g2rain-generator-maven-plugin:1.0.6:generate -Dconfig.file=codegen.properties
+
+verification:
+  status: test-passed
+  verifiedAt: "2026-08-27"
+  command: mvn test
+  testsRun: 31
+  failures: 0
+  errors: 0
+  skipped: 0
+  realDatabaseGeneration: not-run
+  generatedProjectBuild: not-run
+
+documentation:
+  entry: docs/index.md
+  agentEntry: AGENTS.md
+
+aiCoding:
+  activeRequirement: null
+  requirementTemplate: docs/requirements/README.md
+  validation:
+    - 读取中央登记、本地偏差、需求、POM、模板、源码、测试和 Diff
+    - 执行 mvn test
+    - 使用隔离数据库验证独立 generate 与 Crafter foundry
+    - 构建生成项目并检查路径、覆盖、Secret、占位符和 Profile 一致性
