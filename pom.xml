@@ -43,6 +43,12 @@
             <organization>G2rain</organization>
             <organizationUrl>http://www.g2rain.com/</organizationUrl>
         </developer>
+        <developer>
+            <id>alpha</id>
+            <name>Alpha</name>
+            <organization>G2rain</organization>
+            <organizationUrl>http://www.g2rain.com/</organizationUrl>
+        </developer>
     </developers>
 
     <properties>
