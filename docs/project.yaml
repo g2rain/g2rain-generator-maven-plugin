@@ -4,7 +4,7 @@ repository: g2rain/g2rain-generator-maven-plugin
 family: platform-tool
 architectureType: backend-code-generation-maven-plugin
 role: G2rain 官方后端数据库代码生成引擎
-version: 1.0.6
+version: 1.0.7
 license: Apache-2.0
 
 centralRegistration:
@@ -56,12 +56,12 @@ commands:
   verify: mvn test
   package: mvn clean package
   install: mvn clean install
-  help: mvn com.g2rain:g2rain-generator-maven-plugin:1.0.6:help
-  generate: mvn com.g2rain:g2rain-generator-maven-plugin:1.0.6:generate -Dconfig.file=codegen.properties
+  help: mvn com.g2rain:g2rain-generator-maven-plugin:1.0.7:help
+  generate: mvn com.g2rain:g2rain-generator-maven-plugin:1.0.7:generate -Dconfig.file=codegen.properties
 
 verification:
   status: test-passed
-  verifiedAt: "2026-08-27"
+  verifiedAt: "2026-10-04"
   command: mvn test
   testsRun: 31
   failures: 0
