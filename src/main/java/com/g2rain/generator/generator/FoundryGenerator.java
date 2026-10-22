@@ -11,8 +11,12 @@ import org.apache.maven.plugin.logging.Log;
 import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.config.Configuration;
 import org.mybatis.generator.config.Context;
+import org.mybatis.generator.config.JDBCConnectionConfiguration;
 import org.mybatis.generator.config.JavaTypeResolverConfiguration;
+import org.mybatis.generator.config.ModelGeneratorConfiguration;
 import org.mybatis.generator.config.ModelType;
+import org.mybatis.generator.config.Property;
+import org.mybatis.generator.config.PropertyRegistry;
 import org.mybatis.generator.internal.DefaultShellCallback;
 
 import java.io.IOException;
@@ -121,24 +125,29 @@ import java.util.Map;
 public class FoundryGenerator extends AbstractGenerator {
 
     /**
-     * MyBatis Generator 配置
-     */
-    private final Configuration config;
-
-    /**
-     * MyBatis Generator 默认上下文
-     */
-    private final Context defaultContext;
-
-    /**
-     * Shell 回调，用于覆盖已有文件
-     */
-    private final DefaultShellCallback callback;
-
-    /**
      * Foundry 配置
      */
     private final FoundryConfig foundryConfig;
+
+    /**
+     * JDBC 连接配置
+     */
+    private final JDBCConnectionConfiguration jdbcConnectionConfiguration;
+
+    /**
+     * PO 模型生成配置
+     */
+    private final ModelGeneratorConfiguration modelGeneratorConfiguration;
+
+    /**
+     * Java 类型解析配置
+     */
+    private final JavaTypeResolverConfiguration javaTypeResolverConfiguration;
+
+    /**
+     * Shell 回调
+     */
+    private final DefaultShellCallback shellCallback;
 
     /**
      * 构造函数
@@ -151,29 +160,12 @@ public class FoundryGenerator extends AbstractGenerator {
         super(log, "/templates");
 
         this.foundryConfig = foundryConfig;
-        config = new Configuration();
-        defaultContext = new Context(ModelType.FLAT);
-        config.addContext(defaultContext);
-
-        // 添加自定义插件以提取表信息
-        defaultContext.addPluginConfiguration(TableInfoPlugin.generatePluginConfiguration());
-        defaultContext.setId("G2RAIN_GENERATOR");
-        defaultContext.setTargetRuntime("MyBatis3");
-
-        // 配置连接信息
-        defaultContext.setJdbcConnectionConfiguration(foundryConfig.toJDBCConnectionConfiguration());
-
-        // 配置Po对象生成策略
-        defaultContext.setJavaModelGeneratorConfiguration(foundryConfig.toJavaModelGeneratorConfiguration());
-
-        // 配置 Java 类型解析器，启用 JSR310 类型支持
-        JavaTypeResolverConfiguration typeResolver = new JavaTypeResolverConfiguration();
-        typeResolver.addProperty("useJSR310Types", "true");
-        typeResolver.addProperty("forceBigDecimals", "true");
-        defaultContext.setJavaTypeResolverConfiguration(typeResolver);
-
-        // Shell 回调，允许覆盖已有文件
-        callback = new DefaultShellCallback(foundryConfig.isOverwrite());
+        this.jdbcConnectionConfiguration = foundryConfig.toJDBCConnectionConfiguration();
+        this.modelGeneratorConfiguration = foundryConfig.toModelGeneratorConfiguration();
+        this.javaTypeResolverConfiguration = new JavaTypeResolverConfiguration.Builder()
+                .withProperty(new Property(PropertyRegistry.TYPE_RESOLVER_FORCE_BIG_DECIMALS, "true"))
+                .build();
+        this.shellCallback = new DefaultShellCallback();
     }
 
     /**
@@ -192,7 +184,7 @@ public class FoundryGenerator extends AbstractGenerator {
      *     <li>将表名转化为 MyBatis Generator 的 TableConfiguration 并加入上下文：
      *         <ul>
      *             <li>按逗号分割表名，去除首尾空格，并去重</li>
-     *             <li>调用 {@link FoundryConfig#toTableConfiguration(Context, String)} 生成 TableConfiguration</li>
+     *             <li>调用 {@link FoundryConfig#toTableConfiguration(String)} 生成 TableConfiguration</li>
      *             <li>添加到 {@link Context}，供 MyBatis Generator 使用生成 PO 和 Mapper XML</li>
      *         </ul>
      *     </li>
@@ -200,7 +192,7 @@ public class FoundryGenerator extends AbstractGenerator {
      *     <li>执行 MyBatis Generator：
      *         <ul>
      *             <li>使用 {@link MyBatisGenerator} 根据 {@link Configuration} 生成 PO（实体类）和 Mapper XML</li>
-     *             <li>使用 {@link DefaultShellCallback} 覆盖已有文件，保证最新模板生效</li>
+     *             <li>按配置决定是否覆盖已有生成文件</li>
      *             <li>捕获 {@link InterruptedException} 并打印日志，同时恢复线程中断状态</li>
      *             <li>收集生成过程中产生的警告信息，逐条记录到日志中</li>
      *         </ul>
@@ -274,22 +266,35 @@ public class FoundryGenerator extends AbstractGenerator {
             return;
         }
 
-        // 将表名加入 MyBatis Generator 上下文
+        Context.Builder contextBuilder = new Context.Builder()
+                .withId("G2RAIN_GENERATOR")
+                .withDefaultModelType(ModelType.FLAT)
+                .withTargetRuntime("MyBatis3")
+                .withJdbcConnectionConfiguration(jdbcConnectionConfiguration)
+                .withModelGeneratorConfiguration(modelGeneratorConfiguration)
+                .withJavaTypeResolverConfiguration(javaTypeResolverConfiguration)
+                .withPluginConfiguration(TableInfoPlugin.generatePluginConfiguration());
+
         Arrays.stream(tables.split(",")).map(String::strip).distinct().forEach(tableName ->
-                defaultContext.addTableConfiguration(foundryConfig.toTableConfiguration(defaultContext, tableName))
+                contextBuilder.withTableConfiguration(foundryConfig.toTableConfiguration(tableName))
         );
 
-        // 执行 MyBatis Generator
+        Configuration configuration = new Configuration();
+        configuration.addContext(contextBuilder.build());
+
         List<String> warnings = new ArrayList<>();
         try {
-            MyBatisGenerator myBatisGenerator = new MyBatisGenerator(config, callback, warnings);
-            myBatisGenerator.generate(null);
+            warnings = new MyBatisGenerator.Builder()
+                    .withConfiguration(configuration)
+                    .withShellCallback(shellCallback)
+                    .withOverwriteEnabled(foundryConfig.isOverwrite())
+                    .build()
+                    .generateAndWrite();
         } catch (InterruptedException e) {
             log.error("Code generation execution error, message: " + e.getMessage(), e);
             Thread.currentThread().interrupt();
         }
 
-        // 输出警告
         warnings.forEach(log::warn);
 
         // 获取 TableInfo 列表，用于渲染模板
