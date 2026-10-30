@@ -5,6 +5,7 @@ import com.g2rain.generator.model.TableInfo;
 import com.g2rain.generator.utils.ColumnUtils;
 import com.g2rain.generator.utils.Strings;
 import lombok.Getter;
+import org.jspecify.annotations.NullMarked;
 import org.mybatis.generator.api.GeneratedXmlFile;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
@@ -17,11 +18,7 @@ import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.config.PluginConfiguration;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * MyBatis Generator 插件，用于收集表及列信息，生成表结构元数据。
@@ -34,7 +31,7 @@ import java.util.Set;
  * <ul>
  *     <li>收集数据库表信息，包括表名、注释、实体名（驼峰命名）等。</li>
  *     <li>提取列信息，包括主键、基础字段（create_time、update_time、version）及普通字段。</li>
- *     <li>自动移除基础字段和主键字段，避免重复生成 Getter/Setter。</li>
+ *     <li>业务字段与主键/基础字段分开放入 {@link TableInfo}，避免模板重复生成。</li>
  *     <li>提供静态方法 {@link #generatePluginConfiguration()} 方便在 MyBatis Generator 配置中注册插件。</li>
  * </ul>
  *
@@ -47,6 +44,7 @@ import java.util.Set;
  * @author jagger
  * @since 2025/10/25
  */
+@NullMarked
 public class TableInfoPlugin extends PluginAdapter {
     private static final String DELETE_FLAG_COLUMN = "delete_flag";
 
@@ -66,10 +64,10 @@ public class TableInfoPlugin extends PluginAdapter {
      * @return {@link PluginConfiguration} 用于 MyBatis Generator 注册插件
      */
     public static PluginConfiguration generatePluginConfiguration() {
-        PluginConfiguration configuration = new PluginConfiguration();
-        configuration.setConfigurationType(TableInfoPlugin.class.getName());
         tableInfoList.clear();
-        return configuration;
+        return new PluginConfiguration.Builder()
+                .withConfigurationType(TableInfoPlugin.class.getName())
+                .build();
     }
 
     @Override
@@ -80,7 +78,7 @@ public class TableInfoPlugin extends PluginAdapter {
     /**
      * 表模型生成时回调，用于收集表元数据。
      * <p>
-     * 会自动区分主键字段、基础字段与业务字段，并移除基础字段与主键字段。
+     * 会自动区分主键字段、基础字段与业务字段；MBG 2.0 的 {@code getAllColumns()} 不可变，不再原地 remove。
      *
      * @param topLevelClass     生成的模型类
      * @param introspectedTable 表信息
@@ -88,10 +86,10 @@ public class TableInfoPlugin extends PluginAdapter {
      */
     @Override
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        // 从IntrospectedTable中提取表元数据
+        // 从 IntrospectedTable 中提取表元数据
         TableInfo tableInfo = new TableInfo();
         tableInfo.setTableName(introspectedTable.getTableConfiguration().getTableName());
-        tableInfo.setTableComment(introspectedTable.getRemarks());
+        tableInfo.setTableComment(introspectedTable.getRemarks().orElse(null));
         tableInfo.setEntityName(Strings.underlineToCamel(tableInfo.getTableName().toLowerCase(), true));
         tableInfo.setEntityNameLower(Strings.underlineToCamel(tableInfo.getTableName().toLowerCase(), false));
 
@@ -99,39 +97,20 @@ public class TableInfoPlugin extends PluginAdapter {
         List<ColumnInfo> columnInfos = new ArrayList<>();
         List<ColumnInfo> baseColumns = new ArrayList<>();
 
-        Set<String> removeColumnNameSet = new HashSet<>();
         for (IntrospectedColumn column : introspectedTable.getAllColumns()) {
             ColumnInfo columnInfo = getColumnInfo(column);
 
             // 记录主键
             if (columnInfo.isPrimaryKey()) {
                 tableInfo.setPrimaryKey(columnInfo);
-                removeColumnNameSet.add(columnInfo.getColumnName());
             } else if (ColumnUtils.isBaseColumn(columnInfo.getColumnName())) {
                 baseColumns.add(columnInfo);
-                removeColumnNameSet.add(columnInfo.getColumnName());
             } else if (columnInfo.isDeleteFlag()) {
                 tableInfo.setDeleteFlagColumn(columnInfo);
-                removeColumnNameSet.add(columnInfo.getColumnName());
             } else if (columnInfo.isVersion()) {
                 tableInfo.setVersionColumn(columnInfo);
-                removeColumnNameSet.add(columnInfo.getColumnName());
             } else {
                 columnInfos.add(columnInfo);
-            }
-        }
-
-        if (!removeColumnNameSet.isEmpty()) {
-            // 使用迭代器移除元素（避免ConcurrentModificationException）
-            Iterator<IntrospectedColumn> iterator = introspectedTable.getAllColumns().iterator();
-            while (iterator.hasNext()) {
-                IntrospectedColumn column = iterator.next();
-                // 获取数据库字段名
-                String columnName = column.getActualColumnName();
-                // 移除字段
-                if (removeColumnNameSet.contains(columnName)) {
-                    iterator.remove();
-                }
             }
         }
 
@@ -141,7 +120,7 @@ public class TableInfoPlugin extends PluginAdapter {
         }
 
         tableInfoList.add(tableInfo);
-        return false; // 禁止MBG生成PO文件
+        return false; // 禁止 MBG 生成PO文件
     }
 
     /**
@@ -154,7 +133,7 @@ public class TableInfoPlugin extends PluginAdapter {
         ColumnInfo columnInfo = new ColumnInfo();
         columnInfo.setColumnName(column.getActualColumnName());
         columnInfo.setColumnType(column.getJdbcTypeName());
-        columnInfo.setColumnComment(column.getRemarks());
+        columnInfo.setColumnComment(column.getRemarks().orElse(null));
         columnInfo.setPropertyName(column.getJavaProperty());
 
         // 特殊处理 delete_flag 字段：将 tinyint 转换为 Boolean 类型
@@ -166,7 +145,7 @@ public class TableInfoPlugin extends PluginAdapter {
         }
 
         List<IntrospectedColumn> primaryKeyColumns = column.getIntrospectedTable().getPrimaryKeyColumns();
-        if (Objects.nonNull(primaryKeyColumns) && !primaryKeyColumns.isEmpty()) {
+        if (!primaryKeyColumns.isEmpty()) {
             for (IntrospectedColumn primaryKeyColumn : primaryKeyColumns) {
                 if (primaryKeyColumn.getActualColumnName().equals(column.getActualColumnName())) {
                     columnInfo.setPrimaryKey(true);

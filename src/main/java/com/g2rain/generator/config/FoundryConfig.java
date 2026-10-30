@@ -8,9 +8,8 @@ import com.g2rain.generator.utils.Constants;
 import com.g2rain.generator.utils.Strings;
 import lombok.Getter;
 import lombok.Setter;
-import org.mybatis.generator.config.Context;
 import org.mybatis.generator.config.JDBCConnectionConfiguration;
-import org.mybatis.generator.config.JavaModelGeneratorConfiguration;
+import org.mybatis.generator.config.ModelGeneratorConfiguration;
 import org.mybatis.generator.config.TableConfiguration;
 
 import java.io.IOException;
@@ -30,7 +29,7 @@ import java.util.Objects;
  * <ul>
  *     <li>解析 JDBC URL，提取 host、port、database</li>
  *     <li>提供各类包名获取方法（API、Controller、Service、Dao 等）</li>
- *     <li>生成 MyBatis Generator 所需的 TableConfiguration、JDBCConnectionConfiguration、JavaModelGeneratorConfiguration</li>
+ *     <li>生成 MyBatis Generator 所需的 TableConfiguration、JDBCConnectionConfiguration、ModelGeneratorConfiguration</li>
  * </ul>
  * </p>
  *
@@ -54,7 +53,7 @@ import java.util.Objects;
  * // 返回: "com.g2rain.demo.dao.po"
  *
  * // 生成 TableConfiguration
- * TableConfiguration tableConfig = config.toTableConfiguration(context, "user");
+ * TableConfiguration tableConfig = config.toTableConfiguration("user");
  *
  * // 生成 JDBC 配置
  * JDBCConnectionConfiguration jdbcConfig = config.toJDBCConnectionConfiguration();
@@ -63,7 +62,7 @@ import java.util.Objects;
  * <p>注意：
  * <ul>
  *     <li>如果 URL 为空或解析失败，将使用默认的 {@link Constants#DB_HOST}、{@link Constants#DB_PORT}、{@link Constants#DB_NAME}</li>
- *     <li>toJavaModelGeneratorConfiguration 方法会自动创建 PO 文件输出目录</li>
+ *     <li>toModelGeneratorConfiguration 方法会自动创建 PO 文件输出目录</li>
  * </ul>
  * </p>
  *
@@ -217,26 +216,23 @@ public class FoundryConfig extends GeneratorConfig {
      *
      * <p><b>示例：</b></p>
      * <pre>{@code
-     * TableConfiguration tableConfig = config.toTableConfiguration(context, "user_info");
-     * // domainObjectName 会被设置为 "UserInfoPo"
+     * TableConfiguration tableConfig = config.toTableConfiguration("user_info");
      * tableConfig.getTableName(); // "user_info"
-     * tableConfig.getDomainObjectName(); // "UserInfoPo"
      * tableConfig.isDeleteByExampleStatementEnabled(); // false
      * }</pre>
      *
-     * @param context   MyBatis Generator 上下文对象，用于初始化 TableConfiguration
      * @param tableName 数据库表名，例如 "user_info"
      * @return 配置好的 {@link TableConfiguration} 对象，用于生成对应的实体类
      */
-    public TableConfiguration toTableConfiguration(Context context, String tableName) {
-        TableConfiguration tableConfiguration = new TableConfiguration(context);
-        tableConfiguration.setTableName(tableName);
-        tableConfiguration.setCatalog(this.database);
-        tableConfiguration.setSchema(this.database);
-        tableConfiguration.setDeleteByExampleStatementEnabled(false);
-        tableConfiguration.setCountByExampleStatementEnabled(false);
-        tableConfiguration.setUpdateByExampleStatementEnabled(false);
-        return tableConfiguration;
+    public TableConfiguration toTableConfiguration(String tableName) {
+        return new TableConfiguration.Builder()
+                .withTableName(tableName)
+                .withCatalog(this.database)
+                .withSchema(this.database)
+                .withDeleteByExampleStatementEnabled(false)
+                .withCountByExampleStatementEnabled(false)
+                .withUpdateByExampleStatementEnabled(false)
+                .build();
     }
 
     /**
@@ -258,47 +254,30 @@ public class FoundryConfig extends GeneratorConfig {
      * @return 配置好的 {@link JDBCConnectionConfiguration} 对象
      */
     public JDBCConnectionConfiguration toJDBCConnectionConfiguration() {
-        JDBCConnectionConfiguration jdbcConnectionConfiguration = new JDBCConnectionConfiguration();
-        jdbcConnectionConfiguration.setDriverClass(this.driver);
-        jdbcConnectionConfiguration.setConnectionURL(this.url);
-        jdbcConnectionConfiguration.setUserId(this.username);
-        jdbcConnectionConfiguration.setPassword(this.password);
-        return jdbcConnectionConfiguration;
+        return new JDBCConnectionConfiguration.Builder()
+                .withDriverClass(this.driver)
+                .withConnectionURL(this.url)
+                .withUserId(this.username)
+                .withPassword(this.password)
+                .build();
     }
 
     /**
-     * 生成用于 PO 实体类的 {@link JavaModelGeneratorConfiguration} 配置。
+     * 生成用于 PO 实体类的 {@link ModelGeneratorConfiguration} 配置。
      *
-     * <p>该方法会自动创建 PO 文件输出目录，并设置生成的目标包和根类（BasePo）。
-     * 适用于 MyBatis Generator 生成 PO 文件。</p>
+     * <p>自动创建 PO 输出目录，并设置目标工程路径与包名。</p>
      *
-     * <p><b>示例：</b></p>
-     * <pre>{@code
-     * JavaModelGeneratorConfiguration modelConfig = config.toJavaModelGeneratorConfiguration();
-     * modelConfig.getTargetProject(); // 返回输出目录，例如 /project/g2rain-demo/src/main/java
-     * modelConfig.getTargetPackage(); // 返回包名，例如 com.g2rain.demo.dao.po
-     * modelConfig.getProperty("rootClass"); // "com.g2rain.common.model.BasePo"
-     * }</pre>
-     *
-     * <p><b>注意事项：</b></p>
-     * <ul>
-     *     <li>方法会自动创建 PO 输出目录，如果创建失败会抛出 {@link IOException}</li>
-     *     <li>生成的 PO 类会继承 BasePo</li>
-     * </ul>
-     *
-     * @return 配置好的 {@link JavaModelGeneratorConfiguration} 对象
+     * @return 配置好的 {@link ModelGeneratorConfiguration} 对象
      * @throws IOException 当创建 PO 输出目录失败时抛出
      */
-    public JavaModelGeneratorConfiguration toJavaModelGeneratorConfiguration() throws IOException {
-        JavaModelGeneratorConfiguration javaModelGeneratorConfiguration = new JavaModelGeneratorConfiguration();
-
-        // 创建目录
+    public ModelGeneratorConfiguration toModelGeneratorConfiguration() throws IOException {
         Path outputDir = Paths.get(TemplatePaths.PO.getModulePath(stepIn, getProjectName())).resolve(Constants.JAVA_FILE_DIR);
         Files.createDirectories(outputDir);
 
-        javaModelGeneratorConfiguration.setTargetProject(outputDir.toString());
-        javaModelGeneratorConfiguration.setTargetPackage(TemplatePaths.PO.getFullPackage(this.getBasePackage()));
-        return javaModelGeneratorConfiguration;
+        return new ModelGeneratorConfiguration.Builder()
+                .withTargetProject(outputDir.toString())
+                .withTargetPackage(TemplatePaths.PO.getFullPackage(this.getBasePackage()))
+                .build();
     }
 
     /**
